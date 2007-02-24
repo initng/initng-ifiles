@@ -1,0 +1,6 @@
+daemon debug/pidfile-daemon {
+	respawn = no;
+	exec daemon = @/bin/sh@ /etc/initng/debug/pidfile-daemon.sh;
+	pid_file = /tmp/initng-pidfile-debug.pid;
+	forks;
+}

@@ -1,0 +1,14 @@
+# NAME: HPLIP
+# DESCRIPTION: Hewlett-Packard Linux Imaging and Printing - Imaging Daemon
+# WWW: http://hplip.sf.net
+
+daemon daemon/hpiod {
+	need = system/bootmisc virtual/net/lo;
+	exec daemon = @/usr/sbin/hpiod@;
+#ifd debian
+	pid_file = /var/run/hplip/hpiod.pid;
+#elsed
+	pid_file = /var/run/hpiod.pid;
+#endd
+	forks;
+}

@@ -1,0 +1,84 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service system/coldplug/pci {
+	need = system/initial;
+	use = system/modules/depmod system/modules;
+	exec start = /etc/hotplug/${NAME}.rc start;
+	exec stop = /etc/hotplug/${NAME}.rc stop;
+	# don't start two coldplug probes at once (because of the massive bash work in coldplug, static-modules does not have this)
+	syncron = coldplug;
+}
+
+service system/coldplug/usb {
+	need = system/coldplug/pci system/initial;
+	use = system/modules/depmod system/modules;
+	exec start = /etc/hotplug/${NAME}.rc start;
+	exec stop = /etc/hotplug/${NAME}.rc stop;
+	# don't start two coldplug probes at once (because of the massive bash work in coldplug, static-modules does not have this)
+	syncron = coldplug;
+}
+
+service system/coldplug/scsi {
+	need = system/initial system/coldplug/pci;
+	use = system/modules/depmod system/modules;
+	exec start = /etc/hotplug/${NAME}.rc start;
+	exec stop = /etc/hotplug/${NAME}.rc stop;
+	# don't start two coldplug probes at once (because of the massive bash work in coldplug, static-modules does not have this)
+	syncron = coldplug;
+}
+
+service system/coldplug/input {
+	need = system/initial system/coldplug/pci;
+	use = system/modules/depmod system/modules system/coldplug/isapnp;
+	exec start = /etc/hotplug/${NAME}.rc start;
+	exec stop = /etc/hotplug/${NAME}.rc stop;
+	# don't start two coldplug probes at once (because of the massive bash work in coldplug, static-modules does not have this)
+	syncron = coldplug;
+}
+
+service system/coldplug/ide {
+	need = system/initial system/coldplug/pci;
+	use = system/modules/depmod system/modules;
+	exec start = /etc/hotplug/${NAME}.rc start;
+	exec stop = /etc/hotplug/${NAME}.rc stop;
+	# don't start two coldplug probes at once (because of the massive bash work in coldplug, static-modules does not have this)
+	syncron = coldplug;
+}
+
+service system/coldplug/isapnp {
+	need = system/initial;
+	use = system/modules/depmod system/modules;
+	exec start = /etc/hotplug/${NAME}.rc start;
+	exec stop = /etc/hotplug/${NAME}.rc stop;
+	# don't start two coldplug probes at once (because of the massive bash work in coldplug, static-modules does not have this)
+	syncron = coldplug;
+}
+	
+#ifd unknown_system
+service system/coldplug {
+#elsed
+virtual system/coldplug {
+#endd
+#ifd gentoo pingwinek
+	need = system/bootmisc system/coldplug/pci system/coldplug/usb system/coldplug/input;
+	also_stop = system/bootmisc system/coldplug/pci system/coldplug/usb system/coldplug/input;
+#elsed
+	need = system/bootmisc system/coldplug/pci system/coldplug/usb system/coldplug/isapnp system/coldplug/input system/coldplug/ide system/coldplug/scsi;
+	also_stop = system/bootmisc system/coldplug/pci system/coldplug/usb system/coldplug/isapnp system/coldplug/input system/coldplug/ide system/coldplug/scsi;
+#endd
+	use = system/modules/depmod system/modules;
+#ifd unknown_system
+	# this should be done by device-manager
+	script start = {
+		# needed to make /dev/input/mice for X
+		if [ -e /sys/class/input/mice/dev ]
+		then
+			@mkdir@ -p /dev/input
+			@mknod@ /dev/input/mice c 13 63 >/dev/null 2>&1
+		fi
+		exit 0
+	};
+#endd
+}

@@ -1,0 +1,12 @@
+# NAME: dnsmasq
+# DESCRIPTION: Forwarding DNS server
+# WWW: http://www.thekelleys.org.uk/dnsmasq/
+
+daemon daemon/dnsmasq {
+	need = system/initial virtual/net;
+	stdall = /dev/null;
+	exec daemon = @/usr/sbin/dnsmasq@;
+	pid_file = /var/run/dnsmasq.pid;
+	forks;
+	respawn;
+}

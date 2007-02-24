@@ -1,0 +1,22 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service service/ntpdate {
+	need = system/initial system/mountroot system/mountfs/essential virtual/net;
+#ifd debian
+	env NTPSERVERS=pool.ntp.org;
+	env NTPOPTIONS=;
+	env_file = /etc/default/ntpdate;
+	exec start = @/usr/sbin/ntpdate@ -b -s ${NTPOPTIONS} ${NTPSERVERS};
+#elsed gentoo
+	env NTPCLIENT_OPTS = -b -s pool.ntp.org;
+	env_file = /etc/conf.d/ntp-client;
+	exec start = /usr/sbin/ntpdate ${NTPCLIENT_OPTS};
+#elsed
+	env NTPSERVERS=pool.ntp.org;
+	env NTPOPTIONS=;
+	env_file = /etc/conf.d/ntp;
+	exec start = @/usr/sbin/ntpdate@ -b -s ${NTPOPTIONS} ${NTPSERVERS};
+#endd
+}

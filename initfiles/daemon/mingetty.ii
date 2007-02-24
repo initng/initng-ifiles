@@ -1,0 +1,25 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/mingetty/1 {
+	need = system/bootmisc;
+	provide = virtual/getty/1;
+	term_timeout = 3;
+	exec daemon = @/sbin/mingetty@ tty1;
+	respawn;
+	last;
+}
+
+daemon daemon/mingetty/* {
+	need = system/bootmisc;
+	provide = virtual/getty/${NAME};
+	term_timeout = 3;
+	exec daemon = @/sbin/mingetty@ tty${NAME};
+	respawn;
+}
+
+virtual daemon/mingetty {
+	need = daemon/mingetty/2 daemon/mingetty/3 daemon/mingetty/4 daemon/mingetty/5 daemon/mingetty/6;
+	use = system/mountfs/essential service/issue;
+}

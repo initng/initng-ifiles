@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/mini_httpd {
+	need = system/bootmisc virtual/net;
+	env_file=/etc/conf.d/mini_httpd;
+	chdir = ${MINI_HTTPD_DOCROOT};
+	exec daemon = /usr/sbin/mini_httpd -D -i /var/run/mini_httpd.pid ${MINI_HTTPD_OPTS};
+}

@@ -1,0 +1,109 @@
+#!/bin/bash
+
+function gen_runlevel_common
+{
+	if [ ${1} = system.virtual ]; then
+		add_service ${1} \
+			system/udev \
+			system/clock \
+			net/lo system/swap \
+			system/hostname \
+			system/modules \
+			system/urandom \
+			system/usb \
+			system/mountfs \
+			system/keymaps
+
+		if find_exe readahead && [ -f /etc/readahead ]; then
+			add_service ${1} service/readahead
+			echo "NOTE: if you have /usr mounted on another partition:" >&2
+			echo "  cp /usr/sbin/readahead /sbin/readahead" >&2
+		fi
+
+		if find_exe hdparm; then
+			add_service ${1} system/hdparm
+		fi
+
+		[ -e /etc/raidtab -o -e /etc/mdadm.conf ] &&
+			add_service ${1} system/sraid
+
+		if find_exe agetty; then
+			add_service ${1} daemon/agetty
+		elif find_exe mingetty; then
+			add_service ${1} daemon/getty
+		elif find_exe getty; then
+			add_service ${1} daemon/mingetty
+		else
+			echo "Failed to find getty/agetty/mingetty, you must" \
+			" set that manually in ${CONFDIR}/${1}" >&2
+		fi
+
+		if find_exe iptables-restore; then
+			add_service ${1} service/iptables
+		fi
+	else
+		add_service ${1} system
+
+		# sshd
+		check_for ssh && add_service ${1} daemon/sshd
+
+		# samba
+		check_for samba && add_service ${1} daemon/samba
+
+		# acpid
+		find_exe acpid && add_service ${1} daemon/acpid
+
+		# dbus
+		find_exe dbus-daemon && add_service ${1} daemon/dbus
+
+		# hal
+		ls /etc/dbus*/event.d/*hal* >/dev/null 2>&1 &&
+			add_service ${1} daemon/hald
+
+		# cron
+		if find_exe cron; then
+			check_for cron && add_service ${1} daemon/vixie-cron
+		elif find_exe dcron; then
+			check_for cron && add_sercice ${1} daemon/dcron
+		fi
+
+		# Networks thru ifplugd
+		find_exe ifplugd &&
+			add_service ${1} daemon/ifplugd
+
+		# Alsasound
+		if [ -d /proc/asound ]; then
+			add_service ${1} service/alsasound
+
+			in_runlevel ${1} system/coldplug ||
+				add_service ${1} service/alsasound{/cards,/mixerstate}
+		fi
+
+		# Speed freq.
+		[ -d /sys/devices/system/cpu/cpu0/cpufreq ] &&
+			add_service ${1} system/speedstep
+
+		# Laptop Mode (Less hardrive on battery)
+		if find_exe laptop-mode || find_exe laptop_mode; then
+			add_service ${1} service/laptop-mode
+		fi
+
+		# Syslogd
+		if find_exe syslog-ng; then
+			add_service ${1} daemon/syslog-ng
+		elif find_exe metalog; then
+			add_service ${1} daemon/metalog
+		elif find_exe syslogd; then
+			add_service ${1} daemon/syslogd
+		fi
+
+		case ${distro} in
+			gentoo|debian)
+				;;
+			*)
+				copy_sysvinit_services daemon \
+					${default_sysvinit_runlevel}
+				;;
+		esac
+	fi
+}

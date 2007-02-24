@@ -1,0 +1,6 @@
+If you're ugrading from 0.0.x release, and you want to keep your runlevel
+files, you can run 'genrunlevel --migrate', and it will take care of
+migrating the runlevels for you.
+
+Read the documentation on the wiki at http://www.initng.org/
+Installation instructions are provided in the doc/INSTALL file

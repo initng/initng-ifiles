@@ -1,0 +1,9 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service system/ifrename {
+	need = system/initial system/mountfs/essential system/modules;
+	require_file = /etc/iftab;
+	exec start = /sbin/ifrename -d -p;
+}

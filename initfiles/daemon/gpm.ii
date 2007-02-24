@@ -1,0 +1,32 @@
+# NAME: GPM
+# DESCRIPTION: Console mouse driver
+# WWW: http://linux.schottelius.org/gpm/
+
+daemon daemon/gpm {
+	need = system/bootmisc;
+#ifd debian
+	# "Please read CODING_STANDARDS for ii-files!"
+	env device=/dev/input/mice;
+	env type=imps2;
+	env append=;
+	env_file_required = /etc/gpm.conf;
+	script daemon = {
+		[ -n "${responsiveness}" ] && responsiveness="-r ${responsiveness}"
+		[ -n "${sample_rate}" ] && sample_rate="-s ${sample_rate}"
+		# Yes, this /IS/ correct! There is no space after -R!!!!!!
+		# I reserve the right to throw manpages at anyone who disagrees.
+		[ -n "${repeat_type}" -a "${repeat_type}" != "none" ] && append="-R${repeat_type} ${append}"
+		# If both the second device and type are specified, use it.
+		[ -n "${device2}" -a -n "${type2}" ] && append="-M -m ${device2} -t ${type2} ${append}"
+		exec @/usr/sbin/gpm@ -m "${device}" -t "${type}" ${append} -D
+	};
+#elsed
+	env MOUSE=imps2;
+	env MOUSEDEV=/dev/input/mice;
+	env APPEND=;
+	env_file = /etc/conf.d/gpm;
+	exec daemon = @/usr/sbin/gpm@ -m ${MOUSEDEV} -t ${MOUSE} ${APPEND};
+	pid_file = /var/run/gpm.pid;
+	forks;
+#endd
+}

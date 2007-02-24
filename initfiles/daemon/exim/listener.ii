@@ -1,0 +1,17 @@
+daemon daemon/exim/listner {
+	need = system/bootmisc virtual/net daemon/exim/updateconf;
+	conflict = daemon/exim/combined;
+	provide = virtual/mta;
+
+	env COMMONOPTIONS="";
+	env SMTPLISTENEROPTIONS="";
+
+#ifd debian 
+	env_file = /etc/defaults/exim4; 
+#elsed gentoo 
+	env_file = /etc/conf.d/exim; 
+#endd
+
+	exec daemon = @/usr/sbin/exim4@ -bdf ${SMTPLISTENEROPTIONS} ${COMMONOPTIONS};
+	pid_file = /var/run/exim4/exim.pid;
+}

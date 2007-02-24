@@ -1,0 +1,50 @@
+#!/bin/bash
+
+function get_runlevels
+{
+	echo system.virtual default.runlevel
+}
+
+function gen_runlevel
+{
+	[ ${1} == system.virtual ] && return 0
+
+	add_service ${1} daemon/dcron daemon/hald daemon/klogd daemon/portmap
+
+	# Check network interfaces
+	for i in $(ls /etc/sysconfig/network-scripts/ifcfg* | \
+		LANG=C sed -e '/\(ifcfg-lo\|rpmsave\|:\|rpmorig\|rpmnew\)/d' \
+			-e '/\(~\|\.bak\)$/d')
+	do
+		if grep -q "ONBOOT=yes" "${i}"; then
+			i=$(basename "${i}")
+			add_service ${1} net/${i#ifcfg-}
+		fi
+	done
+
+	# Check SELinux status
+	local selinuxfs=`LC_ALL=C awk '/ selinuxfs / { print $2 }' /proc/mounts`
+	if [ -n "${selinuxfs}" ] &&
+	    [ -r /proc/self/attr/current ] &&
+	    [ -r "${selinuxfs}/enforce" ] &&
+	    [ "`cat /proc/self/attr/current`" != 'kernel' ] &&
+	    [ "`cat ${selinuxfs}/enforce`" -eq 1 ] ; then
+	    add_service ${1} system/selinux/dev system/selinux/relabel
+	fi
+
+	# Below is because dm isn't started as SysVinit service in fedora :-/
+	if [ ${default_sysvinit_runlevel} == 5 ]; then
+		local preferred=gdm
+		if [ -f /etc/sysconfig/desktop ]; then
+			. /etc/sysconfig/desktop
+			if [ "${DISPLAYMANAGER}" = GNOME ] && find_exe gdm; then
+				preferred=gdm
+			elif [ "${DISPLAYMANAGER}" = KDE ] && find_exe kdm; then
+				preferred=kdm
+			elif [ -n "${DISPLAYMANAGER}" ]; then
+				preferred="${DISPLAYMANAGER}"
+			fi
+		fi
+		add_service ${1} daemon/${preferred}
+	fi
+}

@@ -1,0 +1,29 @@
+# NAME: Pump
+# DESCRIPTION: DHCP/BOOTP client
+# WWW: http://ftp.debian.org/debian/pool/main/p/pump/
+
+service daemon/pump/* {
+	need = system/bootmisc;
+	env_file = /etc/conf.d/net;
+	script start = {
+		eval opts=\${pump_${NAME}}
+		eval d=\${dhcp_${NAME}}
+		[ "${d}" = "" ] && d="${dhcp}"
+
+		for o in ${d}
+		do
+			case "${o}" in
+				"nodns") opts="${opts} --no-dns"
+			esac
+		done
+
+		h=`hostname`
+		if [ -n "${h}" -a ! "${h}" = "(none)" -a ! "${h}" = "localhost" ]
+		then
+			echo "${opts}" | @grep@ -w -- '-h' || opts="${opts} -h ${h}"
+		fi
+	
+		exec @/sbin/pump@ ${opts} -i ${NAME}
+	}
+	exec stop = @/sbin/pump@ --release -i ${NAME};
+}

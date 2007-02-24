@@ -1,0 +1,12 @@
+service daemon/exim/updateconf {
+	need = system/bootmisc;
+	env UPEX4OPTS="";
+
+#ifd debian 
+	env_file = /etc/defaults/exim4; 
+#elsed gentoo 
+	env_file = /etc/conf.d/exim; 
+#endd
+
+	exec start = @update-exim4.conf@ ${UPEX4OPTS};
+}

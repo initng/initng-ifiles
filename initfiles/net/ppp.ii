@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+
+daemon net/ppp/* {
+	need = system/bootmisc system/modules;
+	use = system/coldplug daemon/bluetooth/rfcomm;
+	exec daemon = @/usr/sbin/pppd@ call $NAME nodetach;
+}

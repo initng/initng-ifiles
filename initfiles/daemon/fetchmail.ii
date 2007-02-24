@@ -1,0 +1,8 @@
+# NAME: Fetchmail
+# DESCRIPTION: Remote mail retrieval and forwarding utility.
+# WWW: http://fetchmail.berlios.de/
+
+daemon daemon/fetchmail {
+	need = system/bootmisc daemon/sendmail virtual/net;
+	exec daemon = @/usr/bin/fetchmail@ -f /etc/fetchmailrc;
+}

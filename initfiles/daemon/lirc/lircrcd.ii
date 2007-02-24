@@ -1,0 +1,14 @@
+daemon daemon/lirc/lircrcd {
+	need = daemon/lirc/lircd;
+	respawn;
+	env user=nobody;
+	env conf=/etc/lircrcd.conf;
+	env_file = /etc/conf.d/lircrcd;
+	suid = ${user};
+	pid_of = lircrcd;
+	script daemon = {
+		[ "${socket}" ] && socket="--output=${socket}"
+		[ "${permission}" ] && permission"--permission=${permission}"
+		@lircrcd@ --output="${socket}" ${permission} "${conf}"
+	}
+}

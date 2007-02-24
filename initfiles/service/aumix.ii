@@ -1,0 +1,18 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service service/aumix {
+	use = service/alsasound;
+	need = system/initial system/bootmisc;
+	stdall = /dev/null;
+	script start = {
+		if [ -f /etc/aumixrc ]
+		then
+			@/usr/bin/aumix@ -f /etc/aumixrc -L
+		else
+			@/usr/bin/aumix@ -v75 -c75 -w75
+		fi
+	};
+	exec stop = @/usr/bin/aumix@ -f /etc/aumixrc -S;
+}

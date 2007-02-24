@@ -1,0 +1,30 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service service/915resolution {
+	need = system/mountfs/essential;
+#ifd fedora lfs mandriva
+	env_file = /etc/sysconfig/915resolution;
+#elsed
+	env_file = /etc/default/915resolution;
+#endd
+	script start = {
+		[ -x @915resolution@ ] || exit 1
+
+#ifd fedora
+		for mode in "${VBMODES[@]}"; do
+			@915resolution@ $mode >/dev/null
+		done
+#elsed
+		if ! [ "${MODE}" -a "${XRESO}" -a "${YRESO}" ]
+		then
+		   echo "*** Your 915resolution hasn't been configured! ***"
+		   echo "Please read /usr/share/doc/915resolution/README.Debian and define"
+		   echo "MODE, XRESO, and YRESO."
+		   exit 0
+		fi
+		exec @915resolution@ ${MODE} ${XRESO} ${YRESO} ${BIT}
+#endd
+	};
+}

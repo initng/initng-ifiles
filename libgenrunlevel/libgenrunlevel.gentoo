@@ -1,0 +1,25 @@
+#!/bin/bash
+
+function copy_gentoo_services
+{
+	for s in /etc/runlevels/${2}/*; do
+		[ -f "/etc/initng/${1}/${s}.i" ] &&
+			echo "${1}/${s}"
+	done
+}
+
+function get_runlevels
+{
+	echo $({
+		ls --color=none /etc/runlevels | sed -e 's/$/.runlevel/'
+		echo system.virtual
+	} | grep -v boot.runlevel | sort -u)
+}
+
+function gen_runlevel
+{
+	if [ ${1} = system.virtual ]; then
+		add_service ${1} system/consolefont
+		copy_gentoo_services system boot
+	fi
+}

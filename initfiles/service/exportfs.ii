@@ -1,0 +1,9 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service service/exportfs {
+	need = system/mountfs;
+	exec start = @exportfs@ -ar;
+	exec stop  = @exportfs@ -au;
+}

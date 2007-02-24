@@ -1,0 +1,116 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+
+#ifd debian linspire pingwinek
+service net/all {
+        stdall = /dev/null;
+        need = system/bootmisc;
+        use = system/modules system/coldplug;
+
+#ifd linspire
+        need = system/los-networking;
+#elsed ubuntu
+        use = system/ifupdown-debian daemon/cardmgr;
+#elsed debian linspire
+        need = system/ifupdown-debian;
+        use = daemon/cardmgr;
+#endd
+
+	provide = virtual/net;
+
+#ifd debian linspire ubuntu
+        script start = {
+                mkdir -p /var/run/network
+                for i in $(@awk@ '$0~/^auto / { for (i=2; i<=NF; i++) print $i }' /etc/network/interfaces)
+                do
+                        ngc -u net/${i}
+                done
+                wait
+	};
+        script stop = {
+                for i in $(@awk@ '$0~/^auto / { for (i=2; i<=NF; i++) print $i }' /etc/network/interfaces)
+                do
+                        ngc -d net/${i}
+                done
+                wait
+	};
+#elsed pingwinek
+        script start = {
+                /etc/net/scripts/initconf write
+                /etc/net/scripts/network.init start
+	};
+        script stop = {
+                /etc/net/scripts/network.init stop
+	};
+#endd
+}
+#endd
+
+service net/lo {
+        need = system/bootmisc;
+        provide = virtual/net/lo;
+        use = system/modules system/coldplug;
+
+#ifd ubuntu
+	use = system/ifupdown-debian;
+#elsed debian linspire
+        need = system/ifupdown-debian;
+#endd
+
+#ifd gentoo
+        exec start = ${INITNG_PLUGIN_DIR}/scripts/net/interface ${NAME} start;
+        exec stop = ${INITNG_PLUGIN_DIR}/scripts/net/interface ${NAME} stop;
+#elsed arch
+        exec start = @/sbin/ifconfig@ lo up;
+        exec stop = @/sbin/ifconfig@ lo down;
+#elsed enlisy
+        exec start = /sbin/enlisy-net lo start;
+	     exec stop = /sbin/enlisy-net lo stop;
+#elsed
+        exec start = @/sbin/ifup@ lo;
+        exec stop = @/sbin/ifdown@ lo;
+#endd
+}
+
+service net/* {
+        stdall = /dev/null;
+        need = system/bootmisc;
+
+#ifd ubuntu
+        use = system/ifupdown-debian;
+#elsed debian linspire
+        need = system/ifupdown-debian;
+#endd
+
+        use = system/modules system/coldplug daemon/cardmgr;
+        provide = virtual/net virtual/net/${NAME};
+ 
+#ifd gentoo
+        exec start = ${INITNG_PLUGIN_DIR}/scripts/net/interface ${NAME} start;
+        exec stop = ${INITNG_PLUGIN_DIR}/scripts/net/interface ${NAME} stop;
+#elsed arch
+        exec start = /sbin/ifconfig ${NAME} up;
+        exec stop = /sbin/ifconfig ${NAME} down;
+#elsed enlisy
+        exec start = /sbin/enlisy-net ${NAME} start;
+	     exec stop = /sbin/enlisy-net ${NAME} stop;
+#elsed
+        script start = {
+		# Put up the interface
+                @/sbin/ifup@ ${NAME}
+		# Check so its up
+                @ifconfig@ ${NAME} | @grep@ -qF "UP" || exit 1
+                exit 0
+	};
+        script stop = {
+                set -e
+		# Shut down.
+                @/sbin/ifdown@ ${NAME}
+		# Check so its down.
+		# @ifconfig@ ${NAME} | @grep@ -qF "UP" && exit 1
+                exit 0
+	};
+#endd
+}

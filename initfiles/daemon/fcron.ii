@@ -1,0 +1,11 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/fcron {
+	need = system/bootmisc virtual/net/lo;
+	exec daemon = @/usr/sbin/fcron@;
+	pid_file = /var/run/fcron.pid;
+	respawn;
+	forks;
+}

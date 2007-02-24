@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/rquotad {
+	need = system/initial daemon/portmap virtual/net;
+	exec daemon = @rpc.rquotad@ -f;
+}

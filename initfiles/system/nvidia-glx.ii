@@ -1,0 +1,38 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service service/nvidia-glx/dev {
+	script start = {
+		[ -d /etc/udev/devices ] &&
+			cp -a /etc/udev/devices/nvidia* /dev
+	};
+}
+
+service service/nvidia-glx {
+	need = system/bootmisc;
+	use = service/nvidia-glx/dev;
+	env_file = /etc/sysconfig/nvidia-config-display;
+	script start = {
+		echo "Checking for nvidia kernel module..."
+		if [ -e "/lib/modules/`uname -r`/extra/nvidia/nvidia.ko" ]
+		then
+			echo "Nvidia kernel module found."
+			@/usr/sbin/nvidia-config-display@ enable
+		else
+			echo "Nvidia kernel module not found."
+			@/usr/sbin/nvidia-config-display@ disable
+		fi
+		retval=${?}
+
+		[ ${retval} = 0 ] && @touch@ /var/lock/subsys/nvidia-glx
+		exit ${retval}
+	};
+	
+	script stop = {
+		@/usr/sbin/nvidia-config-display@ disable
+		retval=${?}
+		[ ${retval} = 0 ] && @rm@ -f /var/lock/subsys/nvidia-glx
+		exit ${retval}
+	};
+}

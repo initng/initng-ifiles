@@ -1,0 +1,18 @@
+# NAME: MythTV
+# DESCRIPTION: Backend server for the mythtv PVR
+# WWW: http://www.mythtv.org
+
+daemon daemon/mythbackend {
+	need = virtual/net/lo system/bootmisc;
+	use = daemon/mysql;
+	suid = mythtv;
+	sgid = mythtv;
+	env HOME = /etc/mythtv;
+	exec daemon = @/usr/bin/mythbackend@;
+#ifd gentoo
+	exec_args daemon = --logfile /var/log/mythtv/mythbackend.log;
+#endd
+	pid_of = mythbackend;
+	forks;
+	respawn;
+}

@@ -1,0 +1,53 @@
+service test {
+	stderr = /tmp/log;
+	nice = -4;
+	suid = nobody;
+	exec_delay start = 1;
+	chdir = /tmp;
+	rlimit_cpu_hard = 1;
+	rlimit_core_soft = 1000;
+	env TEST = Testar env;
+	script start = {
+		echo "initng vers : ${INITNG}"
+		echo "service name: ${NAME}"
+		echo "service     : ${SERVICE}"
+		echo "path        : ${CLASS}"
+		echo "test        : ${TEST}"
+		echo "i_am:       : `@whoami@`"
+		echo "nice:       : `@nice@`"
+		echo "pwd:        : `@pwd@`"
+		echo "limits HARD:"
+		ulimit -a -H
+		echo "limits SOFT:"
+		ulimit -a -S
+#exec
+		echo "	echo \"And exec works!\""
+#endexec
+#ifd debian
+		echo "distribution: debian"
+#endd
+		echo -n "sleeping 1 : "
+		sleep 1
+		echo done
+		echo
+		exit 0
+	};
+
+	script stop = {
+		echo "initng vers : ${INITNG}"
+		echo "service name: ${NAME}"
+		echo "service     : ${SERVICE}"
+		echo "path        : ${CLASS}"
+		echo "test        : ${TEST}"
+		echo "i_am:       : `whoami`"
+		echo "nice:       : `nice`"
+		echo "pwd:        : `@pwd@`"
+		sleep 1
+		echo -n "God"
+		sleep 1
+		echo  "Bye."
+		echo
+		#env
+		exit 0
+	};
+}

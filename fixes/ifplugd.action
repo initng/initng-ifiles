@@ -1,0 +1,32 @@
+#!/bin/sh
+# This file gets called by ifplugd when it wants to bring an interface
+# up or down.
+#
+
+case "$2" in
+	up)
+		if [ "$(pgrep initng)" = "1" ]
+		then
+			ngc -u net/$1
+			exit $?
+		else
+			/etc/init.d/net.$1 --quit start
+		fi
+		exit 1
+		;;
+	down)
+		if [ "$(pgrep initng)" = "1" ]
+		then
+			ngc -d net/$1
+			exit $?
+		else
+			/etc/init.d/net.$1 --quit start
+		fi
+		exit 1
+		;;
+	*)
+		echo "$0: wrong arguments"
+		echo "Call with <interface> <up|down>"
+		exit 1
+		;;
+esac

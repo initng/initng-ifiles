@@ -1,0 +1,9 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/jackd {
+	need = system/bootmisc;
+	use = system/coldplug service/alsasound;
+	exec daemon = /usr/bin/jackd -R -d alsa -d hw:0;
+}

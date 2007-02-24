@@ -1,0 +1,14 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service service/local {
+	need = system/bootmisc;
+	use = system/coldplug;
+#ifd fedora mandriva
+	exec start = /etc/rc.d/rc.local;
+#elsed
+	exec start = /etc/conf.d/local.start;
+	exec stop = /etc/conf.d/local.stop;
+#endd
+}

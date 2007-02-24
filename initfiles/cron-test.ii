@@ -1,0 +1,7 @@
+cron cron-test {
+	nice = 5;
+	suid = nobody;
+	chdir = /tmp;
+	hourly;
+	exec run = echo This is a CRON event!;
+}

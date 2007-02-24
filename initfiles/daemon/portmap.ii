@@ -1,0 +1,18 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/portmap {
+	need = system/bootmisc virtual/net;
+	forks;
+	pid_of = portmap;
+#ifd debian linspire
+	env OPTIONS=;
+	env_file = /etc/default/portmap;
+	exec daemon = @/sbin/portmap@ ${OPTIONS};
+#elsed
+	env PORTMAP_OPTS=;
+	env_file = /etc/conf.d/portmap;
+	exec daemon = @/sbin/portmap@ -d ${PORTMAP_OPTS};
+#endd
+}

@@ -1,0 +1,13 @@
+# NAME: Cherokee
+# DESCRIPTION: Very fast, flexible and easy to configure web server.
+# WWW: http://www.cherokee-project.com/
+
+daemon daemon/cherokee {
+	need = system/bootmisc virtual/net;
+	use = daemon/sshd daemon/mysql daemon/postgres system/mountfs;
+	respawn;
+	pid_file = /var/run/cherokee.pid;
+	forks;
+
+	exec daemon = @cherokee@;
+}

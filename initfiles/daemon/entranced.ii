@@ -1,0 +1,12 @@
+# NAME: Entrance
+# DESCRIPTION: Graphical login/display manager
+# WWW: http://xcomputerman.com/pages/entrance.html
+
+daemon daemon/entranced {
+	need = system/bootmisc;
+	provide = virtual/dm;
+	exec daemon = @/usr/sbin/entranced@;
+	pid_file = /var/run/entranced.pid;
+	respawn;
+	forks;
+}

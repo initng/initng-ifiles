@@ -1,0 +1,16 @@
+# NAME: Asterisk
+# DESCRIPTION: Highly configurable modular software PABX (phone system)
+# WWW: http://www.asterisk.org
+
+daemon daemon/asterisk {
+	need = system/bootmisc virtual/net;
+	use = daemon/postgres daemon/mysql;
+	env ASTERISK_USER = asterisk:asterisk;
+#ifd debian
+	env_file = /etc/default/asterisk;
+#elsed
+	env_file = /etc/conf.d/asterisk;
+#endd
+	suid = ${ASTERISK_USER};
+	exec daemon = @/usr/sbin/asterisk@ ${ASTERISK_OPTS};
+}

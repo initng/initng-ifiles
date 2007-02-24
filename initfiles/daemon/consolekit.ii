@@ -1,0 +1,9 @@
+# NAME: consolekit
+# DESCRIPTION: Daemon used for user switching stuff
+# WWW: http://consolekit.freedesktop.org
+
+daemon daemon/consolekit {
+	need = system/bootmisc;
+	exec daemon = @/usr/sbin/console-kit-daemon@;
+	pid_file = /var/run/console-kit-daemon.pid;
+}

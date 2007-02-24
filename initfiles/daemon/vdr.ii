@@ -1,0 +1,40 @@
+# NAME: VDR
+# DESCRIPTION: Video Disk Recorder - DVB Personal Video Recorder
+# WWW: http://www.cadsoft.de/vdr
+
+daemon daemon/vdr {
+	need = system/bootmisc;
+	use = daemon/lircd;
+	respawn;
+	stdall = /var/log/vdr.log;
+	env USER=vdr;
+	env GROUP=video;
+	env HOME=/var/vdr;
+	env CONFIG=/etc/vdr;
+	env SVDRP_PORT=2001;
+	env VDR_EXTRA_OPTIONS=;
+	env EPGFILE=${HOME}/epg.data;
+	env LANG=de_DE;
+	env_file = /etc/conf.d/vdr;
+	chdir = ${HOME};
+	suid = ${USER};
+	sgid = ${GROUP};
+	script daemon = {
+		for plugin in ${PLUGINS}
+		do
+			# no joke!
+			eval plugins=\"\${plugins} --plugin=\'\${plugin} \${plugin_${plugin}}\'\"
+		done
+		# why too complicated? su has a new environment,
+		# HOME for example is definitiv an other value.
+		# so we replace first all vars via eval and then we enter su.
+		# no variable should be replaced!
+		eval "exec @/usr/bin/vdr@ \
+				--config='${CONFIG}' \
+				--video='${HOME}' \
+				--epgfile='${EPGFILE}' \
+				--port='${SVDRP_PORT}' \
+				${VDR_EXTRA_OPTIONS} \
+				${plugins}"
+	};
+}

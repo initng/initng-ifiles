@@ -1,0 +1,8 @@
+# NAME: svnserve
+# DESCRIPTION: Subversion server daemon
+# WWW: http://subversion.tigris.org/
+
+daemon daemon/svnserve {
+	need = system/bootmisc;
+	exec daemon = @/usr/bin/svnserve@ --daemon --foreground --root=/var/svn;
+}

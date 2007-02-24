@@ -1,0 +1,11 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/NetworkManagerDispatcher {
+	need = system/bootmisc daemon/dbus daemon/NetworkManager;
+	env PID_FILE = /var/run/NetworkManager/NetworkManagerDispatcher.pid;
+	exec daemon = @/usr/sbin/NetworkManagerDispatcher@ --pid-file=${PID_FILE};
+	pid_file = ${PID_FILE};
+	forks;
+}

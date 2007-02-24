@@ -1,0 +1,9 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+
+daemon daemon/hdapsd {
+	need = system/bootmisc virtual/net/lo system/modules;
+	exec daemon = @/usr/sbin/hdapsd@ -a -d hda -s 18;
+}

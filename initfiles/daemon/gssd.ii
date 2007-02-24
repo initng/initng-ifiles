@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/gssd {
+	need = system/initial daemon/portmap virtual/net;
+	exec daemon = @rpc.gssd@ -f;
+}

@@ -1,0 +1,7 @@
+
+%.i: $(srcdir)/%.ii $(top_builddir)/tools/install_service
+#	$(top_builddir)/tools/install_service.pl -i $< -o $@
+	$(top_builddir)/tools/install_service -i $< -o $@
+	chmod 644 $@
+
+CLEANFILES = *.i

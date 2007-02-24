@@ -1,0 +1,182 @@
+#!/bin/bash
+
+. "${INITNG_PLUGIN_DIR}/scripts/net/functions"
+
+interface_get_vars() {
+	echo "config_$1 routes_$1 fallback_$1 fallback_route_$1 metric_$1"
+}
+
+dhcp_start_stop() {
+	if [[ ( -x /usr/sbin/udhcpc || -x /sbin/udhcpc ) && ${mods} == *' udhcpc '* ]]; then
+		ngc $1 "daemon/udhcpc/$2"
+	elif [[ -x /sbin/dhclient && ${mods} == *' dhclient '* ]]; then
+		ngc $1 "daemon/dhclient/$2"
+	elif [[ -x /sbin/pump && ${mods} == *' pump '* ]]; then
+		ngc $1 "daemon/pump/$2"
+	elif [[ -x /sbin/dhcpcd ]]; then
+		ngc $1 "daemon/dhcpcd/$2"
+	elif [[ -x /usr/sbin/udhcpc || -x /sbin/udhcpc ]]; then
+		ngc $1 "daemon/udhcpc/$2"
+	elif [[ -x /sbin/dhclient ]]; then
+		ngc $1 "daemon/dhclient/$2"
+	elif [[ -x /sbin/pump ]]; then
+		ngc $1 "daemon/pump/$2"
+	else
+		eerror "No DHCP client available"
+		return 1
+	fi
+}
+
+start() {
+	[[ -z ${iface} ]] && return 1
+
+	einfo "Bringing interface ${iface} up"
+	eindent
+	local IFACE="${iface}" IFVAR="${ifvar}"
+	
+	if [[ ${iface} != "lo" && $( type -t preup ) == "function" ]]; then
+		ebegin "Running custom preup function"
+		( preup )
+		eend $? || return 1
+	fi
+
+	local i added=0
+	
+	if [[ ${iface} != "lo" ]]; then
+		. "${libdir}/system"
+		local -a mods
+		eval mods=\" \$\{modules_${ifvar}\[@\]\} ${modules[@]} \"
+		
+		# Wireless configuration
+		if grep -q "${iface}: " /proc/net/wireless 2>/dev/null ; then
+			if [[ ${mods} == *' wpa_supplicant '* ]]; then
+				# Until initng can pass env vars around, check for socket existance
+				if [[ ! -S /var/run/wpa_supplicant/${iface} ]]; then
+					ngc -u daemon/wpa_supplicant/${iface} &
+					# We need to zap the interface so wpa_supplicant can start us up
+					# if we started wpa_supplicant ourselves
+					ngc -z net/${iface}
+					return 0
+				fi
+				. "${libdir}/wpa_supplicant"
+				function_wrap wpa_supplicant wireless
+			elif [[ ${mods} != *' !iwconfig '* ]]; then
+				. "${libdir}/iwconfig"
+				iwconfig_start ${iface} || return 1
+				function_wrap iwconfig wireless
+			fi
+
+			# Now, map wireless vars to interface ones
+			. "${libdir}/essidnet"
+			essidnet_start
+		fi
+	fi
+
+	# Delete existing addresses
+	if [[ ${config[0]} == "noop" ]]; then
+		! interface_is_up ${iface} true && interface_del_addresses ${iface}
+	else
+		interface_del_addresses ${iface}
+	fi
+
+	if [[ -z ${config} ]]; then
+		ewarn "No configuration found - defaulting to DHCP"
+		dhcp_start_stop -u ${iface}
+		return $?
+	fi
+
+	# Bring the interface up so we can add IPv6 addresses
+	interface_up ${iface}
+
+	einfo "Configuring ${iface}"
+	eindent
+
+	for (( i=0; i<${#config[@]}; i++ )); do
+		local -a conf=( ${config[i]} )
+		einfo "${conf[0]}"
+		eindent
+
+		case "${conf[0]}" in
+			"null") added=1 ;;
+			"dhcp") dhcp_start_stop -u ${iface} && added=1 ;;
+			*) interface_add_address ${iface} ${conf[@]} && added=1 ;;
+		esac
+		
+		eoutdent
+	done
+	eoutdent
+	[[ ${added} == 0 ]] && return 1
+
+	interface_add_routes ${iface}
+
+	if [[ ${iface} != "lo" ]]; then
+		# Apply any system configuration we have
+		system_start
+
+		# Now save state information and then apply the best state
+		save_state ${iface}
+		i=$( best_interface ${iface} )
+		[[ ${iface} != ${i} ]] && apply_state ${i}
+
+		if [[ $( type -t postup ) == "function" ]]; then
+			ebegin "Running custom postup function"
+			( postup )
+			eend $?
+			eoutdent
+		fi
+	fi
+
+	return 0
+}
+
+stop() {
+	[[ -z ${iface} ]] && return 1
+
+	einfo "Stopping interface ${iface}"
+	eindent
+	local IFACE="${iface}" IFVAR="${ifvar}"
+	
+	if [[ ${iface} != "lo" && $( type -t predown ) == "function" ]]; then
+		ebegin "Running custom predown function"
+		( predown )
+		eend $? || return 1
+	fi
+
+	if [[ -z ${config} ]]; then
+		dhcp_start_stop -d ${iface}
+	fi
+
+	local i
+
+	for (( i=0; i<${#config[@]}; i++ )); do
+		local -a conf=( ${config[i]} )
+		if [[ "${conf[0]}" == "dhcp" ]]; then
+		        dhcp_start_stop -d ${iface}
+		fi
+	done
+
+	interface_del_addresses ${iface}
+	interface_iface_stop ${iface}
+
+	if [[ ${iface} != "lo" ]]; then
+		# Now remove state information and then apply the best state
+		remove_state ${iface}
+		i=$( best_interface ${iface} )
+		[[ -n ${i} ]] && apply_state ${i}
+
+		if [[ $( type -t postdown ) == "function" ]]; then
+			ebegin "Running custom postdown function"
+			( postdown )
+			eend $?
+		fi
+	fi
+
+	return 0
+}
+
+if [[ $2 == "start" || $2 == "stop" ]]; then
+	$2
+else
+	echo "usage: interface <ifname> start|stop" >&2
+	exit 1
+fi

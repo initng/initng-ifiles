@@ -1,0 +1,90 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service system/mountfs/essential {
+	need = system/initial/mountvirtfs system/mountroot system/checkfs;
+	use = system/sraid system/hdparm system/selinux/relabel;
+	critical;
+	never_kill;
+
+	script start = {
+		[ -e /var/initng_isvirt ] && exit 0
+
+		for mp in /tmp /usr /var /srv /opt
+		do
+			@grep@ -q "[[:space:]]${mp}[[:space:]]" /etc/fstab &&
+			@mount@ -v "${mp}" &
+		done
+		wait
+		exit 0
+	};
+
+	script stop = {
+		echo "Sending all processes the TERM signal ..."
+		@killalli5:killall5@ -15
+		sleep 3
+		echo "Sending all processes the KILL signal ..."
+		@killalli5:killall5@ -9
+		sleep 1
+
+		[ -e /var/initng_isvirt ] && exit 0
+
+		@sed@ 's:^\S*\s*::' /etc/mtab | @sort@ -r | while read mp drop
+		do
+			case "${mp}" in
+				/proc|/sys|/dev|/usr|/) ;;
+				*)
+					@umount@ -r -d -f "${mp}" ||
+					echo "WARNING, failed to umount ${mp}" &
+					;;
+			esac
+		done
+
+		@umount@ -r -d -f /usr || echo "WARNING, failed to umount /usr" &
+		wait
+		exit 0
+	};
+}
+
+service system/mountfs/home {
+	need = system/mountroot system/checkfs;
+	never_kill;
+
+	script start = {
+		[ -e /var/initng_isvirt ] ||
+		@grep@ -q "[[:space:]]/home[[:space:]]" /etc/fstab &&
+			@mount@ -v /home
+		exit 0
+	};
+}
+
+service system/mountfs/network {
+	need = system/initial system/mountfs/essential virtual/net;
+	use = daemon/portmap;
+	never_kill;
+	env NET_FS = afs,cifs,coda,davfs,gfs,ncpfs,nfs,nfs4,ocfs2,shfs,smbfs;
+
+	script start = {
+		[ -e /var/initng_isvirt ] ||
+		@mount@ -a -F -t ${NET_FS} ||
+			@mount@ -a -t ${NET_FS}
+	};
+
+	script stop = {
+		[ -e /var/initng_isvirt ] ||
+		@umount@ -a -f -t ${NET_FS}
+	};
+}
+
+service system/mountfs {
+	need = system/mountfs/essential system/mountfs/home;
+	use = system/mountfs/network;
+	never_kill;
+
+	script start = {
+		[ -e /var/initng_isvirt ] ||
+		@mount@ -a -v -t reiserfs,reiser4,reiserfs,reiser4,ext2,ext3,xfs,jfs,vfat,ntfs,ntfs-3g,tmpfs,subfs,bind,auto
+		exit 0
+	};
+}

@@ -1,0 +1,11 @@
+# NAME: Webmin
+# DESCRIPTION: Web-based system configuration interface
+# WWW: http://www.webmin.com
+
+daemon daemon/webmin {
+	need = system/bootmisc;
+	use = daemon/syslog-ng daemon/syslogd;
+	exec daemon = /usr/libexec/webmin/miniserv.pl /etc/webmin/miniserv.conf;
+	pid_file = /var/run/webmin.pid;
+	forks;
+}

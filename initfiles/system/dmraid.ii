@@ -1,0 +1,13 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service system/dmraid {
+    use = system/modules system/udev;
+    script start = {
+	    /sbin/dmraid --activate yes --ignorelocking
+    };
+    script stop = {
+	    /sbin/dmraid --activate no --ignorelocking
+    }
+}

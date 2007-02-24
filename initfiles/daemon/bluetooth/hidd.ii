@@ -1,0 +1,10 @@
+daemon daemon/bluetooth/hidd {
+	need = system/bootmisc daemon/bluetooth/hcid daemon/bluetooth/sdpd;
+        env HIDD_OPTIONS=--server;
+#ifd gentoo
+	env_file = /etc/conf.d/bluetooth;
+#endd
+	exec daemon = @/usr/bin/hidd@ ${HIDD_OPTIONS};
+	forks;
+	pid_of = hidd;
+}

@@ -1,0 +1,48 @@
+.TH "genrunlevel" "8" "" "" ""
+.SH "NAME"
+genrunlevel \- create initng's runlevels
+.SH "SYNOPSIS"
+\fBgenrunlevel\fR [\fB--overwrite\fR] [\fB--path \fIPATH\fR]
+	[\fB--destdir \fIPATH\fR] [\fB--confdir \fIPATH\fR]
+	[\fB--all\fR | \fIfile1 file2 ...\fR]
+\fBgenrunlevel --migrate\fR
+
+.SH "DESCRIPTION"
+\fBgenrunlevel\fR creates the runlevels and virtuals used by initng.
+Generally these are \fIdefault.runlevel\fR and \fIsystem.virtual\fR.
+
+\fBgenrunlevel --migrate\fR fixes your runlevels when there's a change
+in initng-ifiles.
+
+.SH "OPTIONS"
+.TP
+\fB--overwrite\fR
+Overwrite files if they exist.
+.TP
+\fB--path \fIPATH\fR
+Sets the search path for executables.
+.TP
+\fB--destdir \fIPATH\fR
+Destination path prefix (default: /).
+.TP
+\fB--confdir \fIPATH\fR
+Configuration directory (default: /etc/initng).
+.TP
+\fB--all\fR
+Create all runlevels.
+.TP
+\fIfile1 file2 ...\fR
+Create file1 file2 ... fileN runlevels.
+
+.SH "SEE ALSO"
+.BR initng(8),
+.BR ngc(8),
+.BR ngdc(8),
+.BR ng\-update(8),
+.BR install_service(8),
+.BR system_off(8).
+.SH "AUTHOR"
+initng was written by  Jimmy Wennlund <jimmy.wennlund@gmail.com> and can be found at http://www.initng.org/.
+.PP
+This manual page was written by Ismael Luceno <ismael.luceno@gmail.com>.
+Loosely based on gen_system_runlevel manual page, by Armin Berres <a.berres@web.de>.

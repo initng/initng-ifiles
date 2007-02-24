@@ -1,0 +1,5 @@
+daemon debug/syntax-failing-daemon {
+	respawn = no;
+	chdir = /this/will/not/work;
+	<daemon> = @/bin/cat@;
+}

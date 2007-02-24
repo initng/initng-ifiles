@@ -1,0 +1,21 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/udhcpc/* {
+	need = system/bootmisc;
+	use = system/modules system/coldplug;
+	pid_file = /var/run/udhcpc-${NAME}.pid;
+	respawn;
+	env_file = /etc/conf.d/net;
+	forks;
+	script daemon = {
+		eval opts=\"\$\{udhcpc_${NAME}\}\"
+		h=`hostname`
+		if [ -n "${h}" -a ! "${h}" = "(none)" -a ! "${h}" = "localhost" ]
+		then
+			echo "${opts}" | @grep@ -w -- '-h' || opts="${opts} --hostname=${h}"
+		fi
+		exec udhcpc ${opts} --now --script=${INITNG_PLUGIN_DIR}/scripts/net/udhcpc-wrapper --pidfile=/var/run/udhcpc-${NAME}.pid --interface=${NAME}
+	};
+}

@@ -1,0 +1,27 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service daemon/syslogd/prepare {
+	need = system/bootmisc;
+	script start = {
+		if [ ! -e /dev/xconsole ]
+		then
+			mknod -m 640 /dev/xconsole p
+		else
+			chmod 0640 /dev/xconsole
+		fi
+		chown root:root /dev/xconsole	    
+	};
+}
+
+daemon daemon/syslogd {
+	provide = virtual/syslog;
+#ifd debian
+	need = system/bootmisc daemon/syslogd/prepare;
+#elsed
+	need = system/bootmisc;
+	use = daemon/syslogd/prepare;
+#endd
+	exec daemon = @/sbin/syslogd@ -n -m 0;
+}

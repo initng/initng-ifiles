@@ -1,0 +1,4 @@
+daemon debug/conflicting {
+	conflict = test;
+	exec daemon = @/bin/sleep@ 10;
+}

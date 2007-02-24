@@ -1,0 +1,33 @@
+service net/lo {
+	need = system/bootmisc;
+#ifd debian linspire
+	need = system/ifupdown-debian;
+	exec start = /sbin/ifup lo;
+	exec stop = /sbin/ifdown lo;
+#elsed
+	exec start = @/lib/initng@/scripts/net/interface ${NAME} start;
+	exec stop = @/lib/initng@/scripts/net/interface ${NAME} stop;
+#endd
+}
+
+service net/* {
+	need = system/bootmisc;
+	use = system/modules system/coldplug daemon/cardmgr;
+#ifd debian linspire
+	need = system/ifupdown-debian;
+	exec start = /sbin/ifup ${NAME};
+	exec stop = /sbin/ifdown ${NAME};
+#elsed
+	exec start = @/lib/initng@/scripts/net/interface ${NAME} start;
+	exec stop = @/lib/initng@/scripts/net/interface ${NAME} stop;
+#endd
+}
+
+#ifd debian linspire
+service net/all {
+	need = system/bootmisc;
+	use = system/modules system/coldplug daemon/cardmgr;
+	exec start = @/sbin/ifup@ -a;
+	exec stop = @/sbin/ifdown@ -a;
+}
+#endd

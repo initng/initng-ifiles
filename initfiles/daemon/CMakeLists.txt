@@ -1,0 +1,7 @@
+SUBDIRS(bluetooth exim lirc nut vmware)
+
+FILE(GLOB II_FILES "*.ii")
+
+PROCESS_IIFILES(I_FILES ${II_FILES})
+
+INSTALL_FILES(${SYSCONF_INSTALL_DIR}/initng/daemon FILES ${I_FILES})

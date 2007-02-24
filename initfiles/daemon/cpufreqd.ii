@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/cpufreqd {
+	need = system/bootmisc;
+	exec daemon = @/usr/sbin/cpufreqd@ --no-daemon;
+}

@@ -1,0 +1,13 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/httpd {
+	need = system/bootmisc virtual/net;
+	use = daemon/sshd daemon/mysql daemon/postgres system/mountfs;
+	respawn;
+	pid_file = /var/run/httpd.pid;
+	forks;
+
+	exec daemon = @/usr/sbin/httpd@;
+}

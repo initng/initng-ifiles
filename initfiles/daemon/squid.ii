@@ -1,0 +1,13 @@
+# NAME: Squid
+# DESCRIPTION: Caching web proxy server
+# WWW: http://www.squid-cache.org/
+
+daemon daemon/squid {
+	need = system/bootmisc virtual/net;
+	exec daemon = @/usr/sbin/squid@;
+	exec kill = @/usr/sbin/squid@ -k shutdown;
+	pid_file = /var/run/squid.pid;
+	respawn;
+	forks;
+	#daemon_stops_badly;
+}

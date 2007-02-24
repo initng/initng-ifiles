@@ -1,0 +1,41 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+# TODO: Test if we have sarted with fb before starting splashy
+service service/splashy {
+	need = system/initial;
+	env spl_pidfile=/etc/splashy/splashy.pid;
+	env spl_fifo=/etc/splashy/splashy.fifo;
+	env_file = /etc/default/splashy;
+	env SPL_MSG=Starting ${NAME} boot sequence;
+	script start = {
+		[ -x @/sbin/splashy@ ] || exit 0
+		. /etc/init.d/splashy-functions.sh
+		@start-stop-daemon@ --start --quiet --pidfile ${spl_pidfile} --exec @/sbin/splashy@ -- boot 2>/dev/null
+		exec @ngc@ -S "splashy,boot"
+	};
+
+# the stop script is called on shutdown
+# it will start splashy again to show the "shutdown complete" progress bar
+	script stop = {
+		[ -x @/sbin/splashy@ ] || exit 0
+		. /etc/init.d/splashy-functions.sh
+		@start-stop-daemon@ --start --quiet --pidfile ${spl_pidfile} --exec ${DAEMON} -- boot 2> /dev/null
+		exec @ngc@ -S "splashy,shutdown"
+	};
+}
+
+service service/splashy/chvt {
+	script start = {
+		x_vt=""
+		for i in `@seq@ 0 10`
+		do
+			x_vt=`ps -C X -o args= | @sed@ 's/.* vt\([0-9]*\).*/\1/g'`
+			[ ! -z "${x_vt}" ] && break
+			sleep .2
+		done
+		[ "${x_vt}" -gt 0 ] && exit 0
+		exec @/usr/bin/chvt@ ${x_vt}
+	}
+}

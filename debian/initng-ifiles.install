@@ -1,0 +1,11 @@
+etc/initng/
+sbin/ng-update
+sbin/genrunlevel
+lib/libgenrunlevel.common
+lib/libgenrunlevel.debian
+lib/libgenrunlevel
+etc/vim/syntax/initng.vim
+etc/vim/ftdetect/initng.vim
+usr/share/man/man8/
+usr/share/doc/
+etc/ifplugd/action.d/

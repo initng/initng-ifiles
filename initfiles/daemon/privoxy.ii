@@ -1,0 +1,12 @@
+# NAME: Privoxy
+# DESCRIPTION: Anonymising proxy server
+# WWW: http://www.privoxy.org
+
+daemon daemon/privoxy {
+	need = system/bootmisc;
+	exec daemon = @/usr/sbin/privoxy@ --pidfile /var/run/privoxy.pid --user privoxy.privoxy /etc/privoxy/config;
+	pid_file = /var/run/privoxy.pid;
+	forks;
+	respawn;
+	daemon_stops_badly;
+}

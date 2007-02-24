@@ -1,0 +1,5 @@
+service daemon/nut/upsdrv {
+	need = system/bootmisc;
+	exec start = @/usr/sbin/upsdrvctl@ start;
+	exec stop = @/usr/sbin/upsdrvctl@ stop;
+}

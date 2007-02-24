@@ -1,0 +1,15 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/svdrpd {
+	need = system/bootmisc;
+	use = daemon/vdr;
+	respawn;
+	env VDR_HOST=localhost;
+	env VDR_PORT=2002;
+	env SERV_HOST=localhost;
+	env SERV_PORT=2001;
+	env_file = /etc/conf.d/svdrpd;
+	exec daemon = @/usr/bin/svdrpd@ ${VDR_HOST} ${VDR_PORT} ${SERV_HOST} ${SERV_PORT};
+}

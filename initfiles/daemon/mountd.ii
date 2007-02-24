@@ -1,0 +1,9 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/mountd {
+	need = system/initial daemon/portmap virtual/net;
+	exec daemon = @rpc.mountd@ -F;
+	daemon_stops_badly;
+}

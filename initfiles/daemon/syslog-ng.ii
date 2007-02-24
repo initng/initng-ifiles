@@ -1,0 +1,16 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/syslog-ng {
+	provide = virtual/syslog;
+	# Start this as soon as we can
+#ifd debian
+	need = system/bootmisc daemon/syslogd/prepare;
+#elsed
+	need = system/bootmisc;
+#endd
+	exec daemon = @/sbin/syslog-ng@ -p /var/run/syslog-ng.pid;
+	pid_file = /var/run/syslog-ng.pid;
+	forks;
+}

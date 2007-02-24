@@ -1,0 +1,6 @@
+service debug/critical-test {
+	respawn = no;
+	chdir = /this/will/not/work;
+	exec start = @/wont/work@;
+	critical;
+}

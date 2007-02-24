@@ -1,0 +1,10 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/ldm {
+	need = system/bootmisc;
+	use = daemon/xfs system/modules system/coldplug;
+	nice = -4;
+	exec daemon = @/usr/bin/ldm@;
+}

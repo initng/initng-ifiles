@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+virtual service/nfs {
+	need = service/exportfs daemon/gssd daemon/idmapd daemon/mountd daemon/nfsd daemon/statd daemon/svcgssd;
+	use = daemon/rquotad;
+}

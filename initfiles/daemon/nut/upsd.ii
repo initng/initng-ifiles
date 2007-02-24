@@ -1,0 +1,7 @@
+daemon daemon/nut/upsd {
+	need = system/bootmisc daemon/nut/upsdrv virtual/net;
+	exec daemon = @/usr/sbin/upsd@;
+	forks;
+	respawn;
+	pid_file = /var/lib/nut/upsd.pid;
+}

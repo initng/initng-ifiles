@@ -1,0 +1,15 @@
+# NAME: HPLIP
+# DESCRIPTION: Hewlett-Packard Linux Imaging and Printing - Settings and Status Daemon
+# WWW: http://hplip.sourceforge.net
+
+daemon daemon/hpssd {
+	need = system/bootmisc daemon/hpiod;
+#ifd debian
+	exec daemon = @/usr/sbin/hpssd@;
+	pid_file = /var/run/hplip/hpssd.pid;
+#elsed	
+	exec daemon = @/usr/share/hplip/hpssd.py@;
+	pid_file = /var/run/hpssd.pid;
+#endd
+	forks;
+}

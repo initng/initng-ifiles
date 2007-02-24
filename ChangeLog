@@ -1,0 +1,80 @@
+Version History:
+---------------
+2007/02/23
+initng-ifiles 0.1.0
+    * Introduced a new directories scheme.
+    * Fixed denyhosts to set HOSTNAME on Fedora.
+    * Fixed automount to support Fedora.
+    * Added support for Enlisy.
+    * Added detection of iptables to genrunlevel.
+    * Fixed udev script.
+    * Added some support for OpenSuSE to udev.
+    * Added convert_runlevel.sh, to convert your
+      old runlevels to the new scheme.
+    * Removed rp-pppoe, same functionality is provided by pppoe.
+    * Some bug fixes.
+
+2007/02/12
+initng-ifiles 0.0.8
+    * Added: cherokee, wwwoffle, consolekit, chvt,
+    * Improved udev support.
+    * Some improvements and fixes for system/mountfs and friends.
+    * Added virtualization support (needs testing).
+    * Fixed detection of active network interfaces without an ip address.
+    * Fixed libgenrunlevel installation on multi-lib systems.
+    * Fixed ng-update.
+    * Improved Mandriva and PCLinuxOS support.
+    * Many bug fixes.
+
+2007/02/04
+initng-ifiles 0.0.7
+    * nut, hdapsd, bitlbee, samba/winbind, vsftpd, dropbear, ddclient, tor, rlocated, noip, mythbackend, bluetooth, exim, and pbbuttonsd added.
+    * Modified system/mountfs to parallelize the process of mounting filesystems.
+    * Modified all ifiles to take adventage of the new system/mountfs/*.
+    * Replaced gen_system_runlevel with genrunlevel.
+    * Now all services should load modules via system/modules/*.
+    * Fixed the issue about using executables from /usr before it's mounted.
+    * Improved system/mountfs/network, netmount is deprecated.
+    * A lot of bugfixes.
+    * Some documentation updates.
+
+2006/05/20
+initng-ifiles 0.0.5
+    * create /dev/.udev/db and /dev/.udev/queue/ to successfully populate /dev in system/udev.i - otherwise udevtrigger will fail
+
+2006/05/16
+initng-ifiles-0.0.4
+    * require_network and need=net are history. now exists virtual/net.
+    * some bugfixes
+    * nfs and mit-krb5 added (i don't know, if it works, simple try it and report bugs)
+    * autotools-support removed
+
+2006/05/01
+initng-ifiles 0.0.3.2
+    * add system/modules in "gen_system_runlevel -all"
+    * bringing down interfaces on Debian/Ubuntu shouldn't exit with exit 1 anymore
+    * added support for new udev 090 (udevtrigger and udevsettle)
+    * and much more
+
+2006/04/21
+inintng-files 0.0.3.1
+    * networking fixes for Ubuntu Dapper
+    * start iptables as early as possible
+    * hostmame fixes for Debian
+    * more stuff which has been forgotten
+
+2006/04/12
+inintng-files 0.0.3
+    * replace the whole auto* stuff with cmake
+
+2006/03/26
+initng-ifiles 0.0.2.1
+    * hostname: fixed
+
+2006/03/25
+initng-ifiles 0.0.2
+    * moved some stuff to initng
+
+2006/03/08
+initng-ifiles 0.0.1 First release.
+    * added an keyword that you can put in .ii files, and that line will be printed when user uses ng-update to add/delete services.

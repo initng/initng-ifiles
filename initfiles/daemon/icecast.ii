@@ -1,0 +1,9 @@
+# NAME: icecast
+# DESCRIPTION: Multi-format streaming audio server
+# WWW: http://www.icecast.org/
+
+daemon daemon/icecast {
+	need = system/bootmisc;
+	exec daemon = /usr/bin/icecast -c /etc/icecast2/icecast.xml;
+	respawn;
+}

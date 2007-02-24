@@ -1,0 +1,15 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service net/bridge/if/*/* {
+	need = system/bootmisc ${CATEGORY};
+	exec start = @brctl@ addif ${CATEGORY##*/} ${NAME};
+	exec stop  = @brctl@ delif ${CATEGORY##*/} ${NAME};
+}
+
+service net/bridge/br/* {
+	need = system/bootmisc;
+	exec start = @brctl@ addbr ${NAME};
+	exec stop  = @brctl@ delbr ${NAME};
+}

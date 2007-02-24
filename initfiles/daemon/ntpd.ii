@@ -1,0 +1,14 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/ntpd {
+	need = system/bootmisc virtual/net;
+	use = service/ntpdate;
+#ifd gentoo
+	env_file = /etc/conf.d/ntpd;
+#endd
+	pid_file = /var/run/ntpd.pid;
+	forks;
+	exec daemon = @/usr/sbin/ntpd@ -p /var/run/ntpd.pid ${NTPD_OPTS};
+}

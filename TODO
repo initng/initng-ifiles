@@ -1,0 +1,5 @@
+- Rewrite daemon/pump as a daemon.
+- Replace service/pppoe with our own service to let us control pppd.
+- daemon/printconf is a daemon?
+- daemon/nfsd should be a daemon on gentoo too.
+- Rewrite a new auditd as a daemon.

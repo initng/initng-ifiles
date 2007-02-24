@@ -1,0 +1,4 @@
+virtual daemon/exim {
+        need = system/bootmisc virtual/net daemon/exim/updateconf daemon/exim/queuerunner daemon/exim/listner;
+	also_stop = daemon/exim/queuerunner daemon/exim/listner;
+}

@@ -1,0 +1,32 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/agetty/1 {
+	need = system/bootmisc;
+	provide = virtual/getty/1;
+	term_timeout = 3;
+	exec daemon = @/sbin/agetty@ 38400 tty1;
+	respawn;
+	last;
+}
+
+daemon daemon/agetty/* {
+	need = system/bootmisc;
+	provide = virtual/getty/${NAME};
+	term_timeout = 3;
+	script daemon = {
+		case ${NAME} in
+			S*)
+				TERMTYPE=vt100
+				;;
+		esac
+		exec @/sbin/agetty@ 38400 tty${NAME} ${TERMTYPE}
+	};
+	respawn;
+}
+
+virtual daemon/agetty {
+	need = daemon/agetty/2 daemon/agetty/3 daemon/agetty/4 daemon/agetty/5 daemon/agetty/6;
+	use = system/mountfs/essential service/issue;
+}

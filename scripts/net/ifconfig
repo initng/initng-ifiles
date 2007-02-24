@@ -1,0 +1,260 @@
+#!/bin/bash
+# Copyright (c) 2005 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+# Contributed by Roy Marples <uberlord@gentoo.org>
+
+ifconfig() {
+	LC_ALL=C /sbin/ifconfig "$@"
+}
+
+ifconfig_tunnel() {
+	LC_ALL=C /sbin/iptunnel "$@"
+}
+
+route() {
+	LC_ALL=C /sbin/route "$@"
+}
+
+ifconfig_installed() {
+	[[ -x /sbin/ifconfig ]]
+}
+
+ifconfig_exists() {
+	local e=$( ifconfig -a | grep -o "^$1" )
+	[[ -n ${e} ]]
+}
+
+ifconfig_up() {
+	ifconfig $1 up
+}
+
+ifconfig_down() {
+	ifconfig $1 down
+}
+
+# bool ifconfig_is_up(char *iface, bool withaddress)
+#
+# Returns 0 if the interface is up, otherwise 1
+# If withaddress is true then the interface has to have an IPv4 address
+# assigned as well
+ifconfig_is_up() {
+	local check="\<UP\>" addr=${2:-false}
+	${addr} && check="\<inet addr:.*${check}"
+	ifconfig $1 | grep -Eq "${check}"
+}
+
+# void ifconfig_set_flag(char *iface, char *flag, bool enabled)
+#
+# Sets or disables the interface flag 
+ifconfig_set_flag() {
+	local iface=$1 flag=$2 enable=$3
+	${enable} || flag="-${flag}"
+	ifconfig ${iface} ${flag}
+}
+
+# void ifconfig_get_address(char *interface)
+#
+# Fetch the address retrieved by DHCP.  If successful, echoes the
+# address on stdout, otherwise echoes nothing.
+ifconfig_get_address() {
+	local -a x=( $( ifconfig $1 | sed -n -e 's/.*inet addr:\([^ ]*\).*Mask:\([^ ]*\).*/\1 \2/p' ) )
+	x[1]=$( netmask2cidr ${x[1]} )
+	echo "${x[0]}/${x[1]}"
+}
+
+# void ifconfig_get_mac_address(char *interface)
+#
+# Fetch the mac address assingned to the network card
+ifconfig_get_mac_address() {
+	ifconfig $1 | sed -n -e 's/^HWaddr .*\<\(..:..:..:..:..:..\)\>.*/\U\1/p'
+}
+
+# void ifconfig_set_mac_address(char *interface, char *mac)
+#
+# Assigned the mac address to the network card
+ifconfig_set_mac_address() {
+	ifconfig $1 hw ether $2
+}
+
+# void ifconfig_get_aliases_rev(char *interface)
+#
+# Fetch the list of aliases for an interface.  
+# Outputs a space-separated list on stdout, in reverse order, for
+# example "eth0:2 eth0:1"
+ifconfig_get_aliases_rev() {
+	ifconfig | grep -o "^$1:[0-9]* " | tac
+}
+
+# bool ifconfig_interface_del_addresses(char *interface)
+#
+# Remove addresses from interface.  Returns 0 (true) if there
+# were addresses to remove (whether successful or not).  Returns 1
+# (false) if there were no addresses to remove.
+ifconfig_del_addresses() {
+	local iface=$1 i
+	# We don't remove addresses from aliases
+	[[ ${iface} == *:* ]] && return 0
+
+	# iproute2 can add many addresses to an iface unlike ifconfig ...
+	# iproute2 added addresses cause problems for ifconfig
+	# as we delete an address, a new one appears, so we have to
+	# keep polling
+	while ifconfig ${iface} | grep -q -m1 -o 'inet addr:[^ ]*' ; do
+		ifconfig ${iface} 0.0.0.0 || break
+	done
+
+	# Remove IPv6 addresses
+	for i in $( ifconfig ${iface} | sed -n -e 's/^.*inet6 addr: \([^ ]*\) Scope:[^L].*/\1/p' ) ; do
+		/sbin/ifconfig ${iface} inet6 del ${i}
+	done
+	return 0
+}
+
+# bool ifconfig_iface_stop(char *interface)
+#
+# Do final shutdown for an interface or alias.
+#
+# Returns 0 (true) when successful, non-zero (false) on failure
+ifconfig_iface_stop() {
+	# If an alias is already down, then "ifconfig eth0:1 down"
+	# will try to bring it up with an address of "down" which
+	# fails.  Do some double-checking before returning error
+	# status
+	ifconfig_is_up $1 || return 0
+	ifconfig_down $1 && return 0
+
+	# It is sometimes impossible to transition an alias from the
+	# UP state... particularly if the alias has no address.  So
+	# ignore the failure, which should be okay since the entire
+	# interface will be shut down eventually.
+	[[ $1 == *:* ]] && return 0
+	return 1
+}
+
+# bool ifconfig_post_start(char *iface)
+#
+# Bring up iface using ifconfig utilities, called from iface_start
+#
+# Returns 0 (true) when successful on the primary interface, non-zero
+# (false) when the primary interface fails.  Aliases are allowed to
+# fail, the routine should still return success to indicate that
+# net.eth0 was successful
+ifconfig_add_routes() {
+	local x r=1
+	local -a routes
+
+	eval routes='( "${routes_'${ifvar}'[@]}" )'
+	[[ -z ${routes} ]] && return 0
+
+	einfo "Adding routes"
+	eindent
+
+	# Add routes for this interface, might even include default gw
+	for x in "${routes[@]}"; do
+		# Support iproute2 style routes
+		x="${x//via/gw} "
+		x="${x//scope * / }"
+		
+		# Support adding IPv6 addresses easily
+		[[ ${x} == *:* && ${x} != *'-A inet6'* ]] && x="-A inet6 ${x}"
+
+		# Add a metric if we don't have one
+		[[ ${x} != *' metric '* ]] && x="${x} metric ${metric}"
+		
+		einfo "${x}"
+
+		# Assume we're a net device unless told otherwise
+		[[ " ${x} " != *' -net '* && " ${x} " != *' -host '* ]] && x="-net ${x}"
+		
+		route add ${x} dev ${iface} 
+		eend $? && r=0
+	done
+
+	eoutdent
+	return ${r}
+}
+
+# bool ifconfig_add_address(char *iface, char *options ...)
+#
+# Adds the given address to the interface
+ifconfig_add_address() {
+	local iface=$1 i=0 r e
+
+	# Extract the config
+	local -a config=( "$@" )
+	config=( ${config[@]:1} )
+
+	if [[ ${config[0]} == *:* ]]; then
+		# Support IPv6 - nice and simple
+		config[0]="inet6 add ${config[0]}"
+	else
+		# IPv4 is tricky - ifconfig requires an aliased device
+		# for multiple addresses
+		if ifconfig ${iface} | grep -Eq "\<inet addr:.*" ; then
+			# Get the last alias made for the interface and add 1 to it
+			i=$( ifconfig | tac | grep -m 1 -o "^${iface}:[0-9]*" | sed -n -e 's/'${iface}'://p' )
+			i=${i:-0}
+			(( i++ ))
+			iface=${iface}:${i}
+		fi
+
+		# Support iproute2 style config where possible
+		config=( "${config[@]//brd/broadcast}" )
+		config=( "${config[@]//peer/pointtopoint}" )
+	fi
+
+	# Some kernels like to apply lo with an address when they are brought up
+	if [[ ${iface} == "lo" || ${config[@]} == "127.0.0.1/8 broadcast 127.255.255.255" ]]; then
+		ifconfig ${iface} ${config[@]} 2>/dev/null
+		r=0
+	else
+		e=$( ifconfig ${iface} ${config[@]} 2>&1 )
+		r=$?
+		[[ ${r} != 0 ]] && echo "${e}" > /dev/stderr
+	fi
+
+	[[ ${r} != 0 ]] && return ${r}
+
+	[[ ${metric} == 0 || ${auto_interface} != "yes" ]] && return ${r}
+
+	local ip=${config[0]} netmask
+	local cidr=${ip##*/}
+	ip=${ip%%/*}
+
+	if [[ -n ${cidr} && ${cidr} != ${ip} ]]; then
+		netmask=$( cidr2netmask ${cidr} )
+	else
+		for (( i=1; i<${#config[@]}-1; i++ )); do
+			if [[ ${config[i]} == "netmask" ]]; then
+				netmask=${config[i+1]}
+				cidr=$( netmask2cidr ${netmask} )
+				break
+			fi
+		done
+	fi
+
+	[[ -z ${netmask} ]] && return ${r}
+	
+	local network=$( ip_network ${ip} ${netmask} )
+
+	route del -net ${network}/${cidr} dev ${iface}
+	route add -net ${network}/${cidr} metric ${metric} dev ${iface}
+
+	return ${r}
+}
+
+# void ifconfig_default_route(char* interface, char* gateway_ip, int metric)
+#
+# Force default route to the specified gateway
+ifconfig_default_route() {
+	local metric=${3:-0}
+
+	# Delete any existing default routes
+	while true ; do
+		route del default metric ${metric} dev $1 2>/dev/null || break
+	done
+
+	# Then we add our route
+	route add default gw $2 metric ${metric} dev $1
+}

@@ -1,0 +1,9 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/spamd {
+	need = system/bootmisc virtual/net;
+	stdall = /dev/null;
+	exec daemon = @/usr/bin/spamd@ -c;
+}

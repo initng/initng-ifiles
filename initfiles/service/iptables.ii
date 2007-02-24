@@ -1,0 +1,15 @@
+# NAME: iptables
+# DESCRIPTION: Linux firewall, NAT and packet mangling tools
+# WWW: http://www.iptables.org/
+
+service service/iptables {
+	need = system/initial system/mountfs/essential system/hostname virtual/net/lo;
+	provide = virtual/firewall;
+#ifd fedora mandriva
+	env STATEFILE = /etc/sysconfig/iptables;
+#elsed
+	env STATEFILE = /var/lib/iptables/rules-save;
+#endd
+	stdin = ${STATEFILE};
+	exec start = @/sbin/iptables-restore@ -c;
+}

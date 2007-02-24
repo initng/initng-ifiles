@@ -1,0 +1,16 @@
+# NAME: Metalog
+# DESCRIPTION: System logger
+# WWW: http://metalog.sourceforge.net
+
+daemon daemon/metalog {
+	provide = virtual/syslog;
+#ifd debian
+	need = system/bootmisc daemon/syslogd/prepare;
+#elsed
+	need = system/bootmisc;
+#endd
+	exec daemon = @/usr/sbin/metalog@ -B -p /var/run/metalog.pid;
+	pid_file = /var/run/metalog.pid;
+	forks;
+	daemon_stops_badly;
+}

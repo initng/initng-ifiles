@@ -1,0 +1,15 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service service/init/* {
+	need = system/bootmisc;
+#ifd fedora
+	env RCDIR = /etc/rc.d/init.d;
+#elsed
+	env RCDIR = /etc/init.d;
+#endd
+	exec start = ${RCDIR}/${NAME} start;
+	exec stop = ${RCDIR}/${NAME} stop;
+	last;
+}

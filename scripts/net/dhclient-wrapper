@@ -1,0 +1,38 @@
+#!/bin/bash
+# Copyright (c) 2004-2005 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+# Contributed by Roy Marples (uberlord@gentoo.org)
+
+# Instead of writing new functions for dhclient, we simply map their variables
+# over to udhcpc style ones and call those scripts!
+
+case "${reason}" in
+	BOUND|REBOOT|REBIND) action="bound" ;;
+	RENEW) action="renew" ;;
+	RELEASE|PREINIT|FAIL|EXPIRE|TIMEOUT) action="deconfig" ;;
+	MEDIUM) exit 0 ;;
+esac
+
+if [[ -z ${action} ]]; then
+	echo "dhclient sent an unknown action ${reason}!" >&2
+	exit 1
+fi
+
+export ip="${new_ip_address}"
+export subnet="${new_subnet_mask}"
+export broadcast="${new_broadcast_address}"
+routers=( "${new_routers}" )
+export router="${routers[0]}"
+
+export hostname="${new_hostname}"
+
+export dns_domain_${interface}="${new_domain_name}"
+export dns_servers_${interface}="${new_domain_name_servers}"
+
+export ntp_servers_${interface}="${new_domain_name_servers}"
+
+export nis_domain_${interface}="${new_nis_domain}"
+export nis_servers_${interface}="${new_nis_servers}"
+
+${INITNG_PLUGIN_DIR}/scripts/net/dhcp ${action}

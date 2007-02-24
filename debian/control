@@ -1,0 +1,15 @@
+Source: initng-ifiles
+Section: admin
+Priority: optional
+Maintainer: Armin Berres <a.berres@onlinehome.de>
+Build-Depends: debhelper (>= 4.0.0), cmake (>= 2.2), initng-dev
+Standards-Version: 3.6.2
+
+Package: initng-ifiles
+Architecture: all
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Replaces: initng (<= 0.5.5-1)
+Recommends: initng
+Description: scripts for initializing and shutting down the system with Initng
+ The scripts in this package initialize a Debian GNU/Linux system using
+ Initng at boot time and finalize it at halt or reboot time.

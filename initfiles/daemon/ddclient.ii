@@ -1,0 +1,13 @@
+# NAME: ddclient
+# DESCRIPTION: Update client for DynDNS.com's dynamic IP service (and others)
+# WWW: http://ddclient.sourceforge.net/
+
+daemon daemon/ddclient {
+        suid = ddclient;
+        sgid = ddclient;
+        need = virtual/net system/bootmisc;
+        exec daemon = @/usr/sbin/ddclient@;
+        pid_file = /var/run/ddclient/ddclient.pid;
+        forks;
+        respawn;
+}

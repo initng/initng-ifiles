@@ -1,0 +1,27 @@
+# NAME: Autofs
+# DESCRIPTION: kernel-based automounter for Linux
+# WWW:
+
+#ifd fedora
+daemon daemon/automount {
+	need = system/modules/autofs4;
+#elsed
+daemon daemon/automount/* {
+	use = system/modules/autofs4;
+#endd
+	need = system/bootmisc;
+#ifd fedora
+        env PIDFILE=/var/lock/subsys/autofs;
+        env_file = /etc/sysconfig/autofs;
+	exec daemon = @automount@ --pid-file ${PIDFILE} ${OPTIONS};
+#elsed
+	env TIMEOUT=30;
+	env_file = /etc/conf.d/automount;
+	env MOUNTPOINT=/mnt/${NAME};
+	env PIDFILE=/var/run/autofs.${NAME}.pid;
+	env CONFFILE=/etc/autofs/auto.${NAME};
+	exec daemon = @automount@ --timeout ${TIMEOUT} --pid-file ${PIDFILE} ${MOUNTPOINT} file ${CONFFILE};
+#endd
+	pid_file = ${PIDFILE};
+	forks;
+}

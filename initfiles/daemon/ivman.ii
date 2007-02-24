@@ -1,0 +1,10 @@
+# NAME: ivman
+# DESCRIPTION: Automounter
+# WWW: http://ivman.sf.net
+
+daemon daemon/ivman {
+	need = system/bootmisc daemon/dbus daemon/hald;
+	pid_file = /var/run/ivman.pid;
+	forks;
+	exec daemon = @/usr/bin/ivman@;
+}

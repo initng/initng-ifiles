@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/rsyncd {
+	need = system/bootmisc virtual/net;
+	exec daemon = @/usr/bin/rsync@ --daemon --no-detach;
+}

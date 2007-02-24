@@ -1,0 +1,36 @@
+# NAME: OpenSSH
+# DESCRIPTION: The standard Linux SSH server
+# WWW: http://www.openssh.com/
+
+service daemon/sshd/generate_keys {
+	env KEYGEN=/usr/bin/ssh-keygen;
+	env RSA1_KEY=/etc/ssh/ssh_host_key;
+	env RSA_KEY=/etc/ssh/ssh_host_rsa_key;
+	env DSA_KEY=/etc/ssh/ssh_host_dsa_key;
+	script start = {
+		[ ! -s ${RSA1_KEY} ] && \
+			${KEYGEN} -q -t rsa1 -f ${RSA1_KEY} -C '' -N '' 2>&1 >/dev/null
+		if [ ! -s ${RSA_KEY} ]
+		then
+			${KEYGEN} -q -t rsa -f ${RSA_KEY} -C '' -N '' 2>&1 >/dev/null
+			chmod 600 ${RSA_KEY}
+			chmod 644 ${RSA_KEY}.pub
+		fi
+		if [ ! -s ${DSA_KEY} ]
+		then
+			${KEYGEN} -q -t dsa -f ${DSA_KEY} -C '' -N '' 2>&1 >/dev/null
+			chmod 600 ${DSA_KEY}
+			chmod 644 ${DSA_KEY}.pub
+		fi
+	}
+}
+
+daemon daemon/sshd {
+	need = system/bootmisc virtual/net;
+	conflict = daemon/dropbear;
+	use = daemon/sshd/generate_keys;
+	exec daemon = @/usr/sbin/sshd@;
+	pid_file = /var/run/sshd.pid;
+	forks;
+	daemon_stops_badly;
+}

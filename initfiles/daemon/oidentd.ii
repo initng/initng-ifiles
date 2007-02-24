@@ -1,0 +1,22 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/oidentd {
+	need = system/initial system/mountroot virtual/net;
+	env OIDENT_OPTIONS=;
+	env OIDENT_USER=nobody;
+	env OIDENT_GROUP=nogroup;
+#ifd debian
+	env_file = /etc/default/oidentd;
+#endd
+	script daemon = {
+		if [ "${OIDENT_BEHIND_PROXY}" = "yes" ]
+		then
+			# If we have a default router, then allow it to proxy auth requests to us
+			GATEWAY=`netstat -nr | @awk@ '/^0.0.0.0/{print $2}'`
+			[ -n "${GATEWAY}" ] && OIDENT_OPTIONS="${OIDENT_OPTIONS} -P ${GATEWAY}"
+		fi
+		exec @/usr/sbin/oidentd@ -i ${OIDENT_OPTIONS} -u ${OIDENT_USER} -g ${OIDENT_GROUP}
+	};
+}

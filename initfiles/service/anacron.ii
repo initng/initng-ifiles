@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service service/anacron {
+	need = system/bootmisc;
+	exec start = @/usr/sbin/anacron@ -s;
+}

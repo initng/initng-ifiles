@@ -1,0 +1,14 @@
+# NAME: timidity++
+# DESCRIPTION: Software MIDI synthesiser
+# WWW: http://timidity.sourceforge.net
+
+daemon daemon/timidity {
+    need = service/alsasound system/bootmisc;
+#ifd gentoo
+    use = daemon/esound;
+    env_file = /etc/conf.d/timidity;
+    exec daemon = @/usr/bin/timidity@ -iA ${TIMIDITY_OPTS};
+#elsed
+    exec daemon = @/usr/bin/timidity@ -iA -B2,8 -Os;
+#endd
+}

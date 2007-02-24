@@ -1,0 +1,80 @@
+#!/bin/bash
+# Copyright (c) 2004-2005 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# Contributed by Roy Marples (uberlord@gentoo.org)
+
+. ${INITNG_PLUGIN_DIR}/scripts/net/functions
+
+wpa_supplicant() {
+	LC_ALL=C /usr/sbin/wpa_supplicant "$@"
+}
+
+wpa_cli() {
+	LC_ALL=C /usr/bin/wpa_cli "$@"
+}
+
+wpa_supplicant_get_essid() {
+	local i essid
+
+	for (( i=0; i<5; i++ )); do
+		essid=$( wpa_cli -i$1 status | sed -n -e 's/^ssid=//p' )
+		if [[ -n ${essid} ]]; then
+			echo ${essid}
+			return 0
+		fi
+		sleep 1
+	done
+
+	return 1
+}
+
+# char* wpa_supplicant_get_ap_mac_address(char *interface)
+#
+# Returns the MAC address of the Access Point
+# the interface is connected to
+wpa_supplicant_get_ap_mac_address() {
+	wpa_cli -i$1 status | sed -n -e 's/^bssid=\([^=]\+\).*/\U\1/p'
+}
+
+# bool wpa_supplicant_associated(char *interface)
+#
+# Returns 0 if we're associated correctly or 1 if not
+# Note that just because we are associated does not mean we are using the
+# correct encryption keys
+# We only need this for wpa_supplicant-0.3.x
+wpa_supplicant_associated() {
+	local -a status=( "$( wpa_cli -i$1 status | sed -n -e 's/^\(key_mgmt\|wpa_state\|EAP state\)=\([^=]\+\).*/\U\2/p' )" )
+
+	case ${status[0]} in
+		"NONE")			[[ ${status[1]} == "ASSOCIATED" ]] ;;
+		"IEEE 802.1X (no WPA)")	[[ ${status[2]} == "SUCCESS" ]] ;;
+		*)					[[ ${status[1]} == "COMPLETED" ]] ;;
+	esac
+
+	return $?
+}
+
+wpa_supplicant_associate() {
+	local timeout i
+
+	ebegin "Waiting for association"
+	eval timeout=\"\$\{wpa_timeout_${ifvar}:-60\}\"
+	for (( i=0; i<${timeout}; i++ )); do
+		if ! wpa_cli -i${iface} status &>/dev/null ; then
+			eend 1 "wpa_supplicant has exited unexpectedly"
+			return 1
+		fi
+		wpa_supplicant_associated ${iface} && break
+		sleep 1
+	done
+	if [[ ${i} == ${timeout} ]]; then
+		if ! wpa_supplicant_associated ${iface}; then
+			eend 1 "wpa_supplicant failed to associate"
+			# We now need to kill the process
+			pkill -f "/usr/sbin/wpa_supplicant -i${iface}"
+			return 1
+		fi
+	fi
+	eend 0
+}
+

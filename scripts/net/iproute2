@@ -1,0 +1,237 @@
+#!/bin/bash
+# Copyright (c) 2004-2005 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+# Contributed by Roy Marples (uberlord@gentoo.org)
+
+# Fix any potential localisation problems
+# Note that LC_ALL trumps LC_anything_else according to locale(7)
+ip() {
+	LC_ALL=C /sbin/ip "$@"
+}
+
+iproute2_tunnel() {
+	LC_ALL=C /sbin/ip tunnel "$@"
+}
+
+# bool iproute2_check_installed(void)
+#
+# Returns 1 if iproute2 is installed, otherwise 0
+iproute2_installed() {
+	[[ -x /sbin/ip && -e /proc/net/netlink ]]
+}
+
+# bool iproute2_exists(char *interface, bool report)
+#
+# Returns 1 if the interface exists, otherwise 0
+iproute2_exists() {
+	local x=$( ip addr show label $1 )
+	[[ -n ${x} ]]
+}
+
+# void iproute2_up(char *interface)
+#
+# provides a generic interface for bringing interfaces up
+iproute2_up() {
+	ip link set up dev $1
+}
+
+# void iproute2_down(char *interface)
+#
+# provides a generic interface for bringing interfaces up
+iproute2_down() {
+	ip link set down dev $1
+}
+
+# bool ifproute2_is_up(char *iface, bool withaddress)
+#
+# Returns 0 if the interface is up, otherwise 1
+# If withaddress is true then the interface has to have an IPv4 address
+# assigned as well
+iproute2_is_up() {
+	local check="\<UP\>" addr=${2:-false}
+	${addr} && check="${check}.*inet "
+	ip addr show $1 | grep -Eq "${check}" && return 0
+	return 1
+}
+
+# void iproute2_set_flag(char *iface, char *flag, bool enabled)
+#
+# Sets or disables the interface flag 
+iproute2_set_flag() {
+	local enable=$3 opt="on"
+	${enable} || opt="off"
+	ip link set $1 $2 ${opt}
+}
+
+# void iproute2_get_address(char *interface)
+#
+# Fetch the address retrieved by DHCP.  If successful, echoes the
+# address on stdout, otherwise echoes nothing.
+iproute2_get_address() {
+	ip -family inet addr show $1 \
+		| sed -n -e 's/.*inet \([^ ]*\).*/\1/p'
+}
+
+# void iproute2_get_mac_address(char *interface)
+#
+# Fetch the mac address assingned to the network card
+iproute2_get_mac_address() {
+	ip link show $1 \
+		| sed -n -e 's/^.*\<\(..:..:..:..:..:..\)\>.*/\U\1/p'
+}
+
+# void iproute2_set_mac_address(char *interface, char *mac)
+#
+# Assigned the mac address to the network card
+iproute2_set_mac_address() {
+	ip link set address $2 dev $1
+}
+
+# void iproute2_get_aliases_rev(char *interface)
+#
+# Fetch the list of aliases for an interface.  
+# Outputs a space-separated list on stdout, in reverse order, for
+# example "eth0:2 eth0:1"
+iproute2_get_aliases_rev() {
+	local iface=$( interface_device $1 )
+	ip addr show dev ${iface} | grep -o "${iface}:[0-9].*" | tac
+}
+
+# bool iproute2_del_addresses(char *interface, bool report)
+#
+# Remove addresses from interface.
+iproute2_del_addresses() {
+	ip addr flush label $1 scope global &>/dev/null
+	ip addr flush label $1 scope host &>/dev/null
+	return 0
+}
+
+# char* iproute2_get_vars(char *interface)
+#
+# Returns a string spaced with possible user set
+# configuration variables
+iproute2_get_vars() {
+	echo "config_$1 routes_$1 fallback_$1 fallback_route_$1 metric_$1"
+}
+
+# bool iproute2_iface_stop(char *interface)
+#
+# Do final shutdown for an interface or alias.
+#
+# Returns 0 (true) when successful, non-zero (false) on failure
+iproute2_iface_stop() {
+	local label=$1 iface=$( interface_device $1 )
+
+	# Shut down the link if this isn't an alias or vlan
+	if [[ ${label} == ${iface} ]]; then
+		iproute2_down ${iface}
+		return $?
+	fi
+	return 0
+}
+
+# bool iproute2_add_address(char *interface, char *options ...)
+#
+# Adds an the specified address to the interface
+# returns 0 on success and non-zero on failure
+iproute2_add_address() {
+	local iface=$1
+
+	# Extract the config
+	local -a config=( "$@" )
+	config=( ${config[@]:1} )
+
+	# Convert an ifconfig line to iproute2
+	local n=${#config[@]};
+	for (( x=0; x<n; x++ )); do
+		case ${config[x]} in
+			netmask)
+				config[0]="${config[0]}/$( netmask2cidr ${config[x+1]} )"
+				unset config[x] config[x+1]
+				;;
+			mtu)
+				ip link set mtu ${config[x+1]} dev ${iface}
+				unset config[x] config[x+1]
+				;;
+		esac
+	done
+	config=( "${config[@]//pointtopoint/peer}" )
+
+	# Work out a broadcast if none supplied
+	[[ ${config[@]} != *' brd '* && ${config[@]} != *' broadcast '* ]] \
+		&& config=( "${config[@]}" "brd +" )
+
+	# Always scope lo addresses as host unless specified otherwise
+	[[ ${iface} == "lo" && " ${config[@]} " != *' scope '* ]] \
+		&& config=( "${config[@]}" "scope host" )
+
+	# Some kernels like to apply lo with an address when they are brought up
+	local r
+	if [[ ${iface} == "lo" && ${config[@]} == "127.0.0.1/8 brd 127.255.255.255 scope host" ]]; then
+		ip addr add dev ${iface} ${config[@]} 2>/dev/null
+		r=0
+	else
+		ip addr add dev ${iface} ${config[@]}
+		r=$?
+	fi
+
+	# Remove the newly added route and replace with our metric
+	[[ ${metric} == 0 || ${auto_interface} != "yes" ]] && return ${r}
+	
+	local network=$( ip_network ${config[0]} )
+	[[ -z ${network} ]] && return ${r}
+
+	local cidr=${config[0]}
+	cidr=${cidr##*/}
+	
+	ip route del ${network}/${cidr} dev ${iface}
+	ip route add ${network}/${cidr} metric ${metric} dev ${iface}
+	
+	return ${r}
+}
+
+# bool iproute2_post_start(char *interface)
+#
+# Runs any post_start stuff on our interface and adds routes
+# Always returns 0
+iproute2_add_routes() {
+	local routes x r=1
+
+	eval routes='( "${routes_'${ifvar}'[@]}" )'
+	[[ -z ${routes} ]] && return 0
+
+	einfo "Adding routes"
+	eindent
+
+	# Set routes with ip route -- this might also include default route
+	iproute2_up ${iface}
+	for x in "${routes[@]}"; do
+		# Support net-tools routing too
+		x=${x//gw/via}
+		x=${x//-A inet6}
+		x=${x//-net}
+		[[ ${x} == *'-host'* ]] && x="${x//-host} scope host"
+
+		# Add a metric if we don't have one
+		[[ ${x} != *' metric '* ]] && x="${x} metric ${metric}"
+		
+		einfo "${x}"
+		ip route append ${x} dev ${iface}
+		eend $? && r=0
+	done
+	eoutdent
+
+	return ${r}
+}
+
+# void iproute2_default_route(char* interface, char* gateway_ip, int metric)
+#
+# Force default route to the specified gateway, optionally on
+# the given interface
+iproute2_default_route() {
+	local metric=${3:-0}
+
+	ip route change default via $2 metric ${metric} dev $1 2>/dev/null \
+	|| ip route append default via $2 metric ${metric} dev $1 2>/dev/null
+}

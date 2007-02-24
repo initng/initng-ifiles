@@ -1,0 +1,26 @@
+# NAME: smartmontools
+# DESCRIPTION: Monitoring daemon for S.M.A.R.T. hard drive diagnostics
+# WWW: http://smartmontools.sourceforge.net
+
+daemon daemon/smartd {
+	need = system/bootmisc;
+#ifd fedora mandriva
+	env_file = /etc/sysconfig/smartmontools;
+	script daemon = {
+		[ -f /etc/smartd.conf ] || smartd-conf.py > /etc/smartd.conf
+		/usr/sbin/smartd -p /var/run/smartd.pid ${smartd_opts}
+	};
+#elsed debian
+	env_file = /etc/default/smartmontools;
+	exec daemon = /usr/sbin/smartd -p /var/run/smartd.pid ${smartd_opts};
+#elsed
+	env_file = /etc/conf.d/smartd;
+	exec daemon = /usr/sbin/smartd -p /var/run/smartd.pid ${SMARTD_OPTS};
+#endd
+	forks;
+#ifd fedora
+	pid_of = smartd;
+#elsed
+	pid_file = /var/run/smartd.pid;
+#endd
+}

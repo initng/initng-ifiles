@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/nagios {
+	need = system/bootmisc virtual/net;
+	exec daemon = /usr/bin/nagios -d /etc/nagios/nagios.cfg;
+	pid_file = /var/run/nagios.pid;
+	forks;
+}

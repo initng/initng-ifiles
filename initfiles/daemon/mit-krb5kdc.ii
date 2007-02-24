@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/mit-krb5kdc {
+	need = system/bootmisc virtual/net;
+	exec daemon = /usr/sbin/krb5kdc -n;
+}

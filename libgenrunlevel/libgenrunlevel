@@ -1,0 +1,112 @@
+#!/bin/bash
+
+function write_runlevel
+{
+	local service
+	local services=`eval echo \$\{rl_${1%.*}\}`
+	{
+		for service in ${services}; do
+			echo ${service}
+		done
+	} | sort -u
+}
+
+function add_service
+{
+	local rl=rl_${1%.*}
+	shift
+
+	while [ ${#} -gt 0 ]; do
+		eval ${rl}="\"\$${rl} ${1}\""
+		shift
+	done
+}
+
+function add_runlevel
+{
+	runlevels=${runlevels}" ${1}"
+	eval rl_${1%.*}=
+}
+
+function in_runlevel
+{
+	eval echo \$\{rl_${1%.*}\} | grep -q ${2} && return 0
+	return 1
+}
+
+function find_exe
+{
+	for p in ${search_path}; do
+		[ -f "${p}/${1}" ] && return 0
+	done
+	return 1
+}
+
+function check_for
+{
+	local rl=${get_default_sysvinit_runlevel}
+
+	ls /etc/rc${rl}.d/S*${1}* >/dev/null 2>&1 && return 0
+	ls /etc/rd.d/rc${rl}.d/S*${1}* >/dev/null 2>&1 && return 0
+	ls /etc/runlevels/*/*${1}* >/dev/null 2>&1 && return 0
+	return 1
+}
+
+function copy_sysvinit_services
+{
+	if [ -d "/etc/rc${2}.d" ]; then
+		for i in /etc/rc${2}.d/S*; do
+			sname=`basename ${i}`
+			sname=${sname##S[0-9][0-9]}
+			[ -f "${CONFDIR}/${1}/${sname}.i" ] &&
+				echo "${1}/${sname}"
+		done
+	fi
+}
+
+function create_list
+{
+	if [ -z "${overwrite}" -a -e "${CONFDIR}/${1}" ]; then
+		echo "${1} already exists, skipping..."
+		return 1
+	fi
+
+	echo "Automatically generating ${1}" >&2
+
+	add_runlevel ${1}
+	gen_runlevel_common ${1}
+	gen_runlevel ${1}
+}
+
+
+#
+# libgenrunlevel initialization
+#
+overwrite=
+all=
+runlevels=
+search_path=
+
+#
+# Identify the distribution
+#
+distro=generic
+[ -e /etc/gentoo-release ] && distro=gentoo
+[ -e /etc/debian_version ] && distro=debian
+[ -e /etc/fedora-release ] && distro=fedora
+
+#
+# Get the default sysvinit runlevel
+#
+default_sysvinit_runlevel=2
+if [ -f /etc/inittab ]; then
+	default_sysvinit_runlevel=`grep ":initdefault:" /etc/inittab`
+	default_sysvinit_runlevel=${default_sysvinit_runlevel#id:}
+	default_sysvinit_runlevel=${default_sysvinit_runlevel%:initdefault:}
+fi
+
+#
+# Load common and distribution-specific routines
+#
+. ${LIB}.common
+. ${LIB}.${distro}

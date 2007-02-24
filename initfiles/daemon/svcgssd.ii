@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/svcgssd {
+	need = system/initial daemon/portmap;
+	exec daemon = @rpc.svcgssd@ -f;
+}

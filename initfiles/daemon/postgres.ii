@@ -1,0 +1,83 @@
+# NAME: PostgreSQL
+# DESCRIPTION: Relational database
+# WWW: http://www.postgresql.org/
+
+#ifd debian
+daemon daemon/postgres/* {
+        need = system/bootmisc;
+        use = daemon/postgres/initdb/${NAME};
+        provide = virtual/postgres;
+
+        suid = postgres;
+        sgid = postgres;
+
+        pid_file = /var/run/postgresql/${NAME}-main.pid;
+
+        script daemon = {
+                . /usr/share/postgresql-common/init.d-functions
+                start ${NAME}
+};
+        script kill = {
+                . /usr/share/postgresql-common/init.d-functions
+                stop ${NAME}
+};
+
+        forks;
+}
+#elsed
+service daemon/postgres/initdb {
+        need = system/bootmisc;
+#ifd pingwinek
+        env PGDATA=/srv/pgsql;
+#elsed
+        env PGDATA=/var/lib/postgresql/data;
+#endd
+        env PGUSER=postgres;
+        env PGGROUP=postgres;
+#ifd gentoo
+        env_file = /etc/conf.d/postgresql;
+#endd
+        script start = {
+            if [ ! -f ${PGDATA}/PG_VERSION ]
+            then
+                if [ ! -d ${PGDATA} ]
+                then
+                    @mkdir@ -p ${PGDATA}
+                    chown ${PGUSER}.${PGGROUP} ${PGDATA}
+                    chmod go-rwx ${PGDATA}
+                fi
+                # Initialize the database
+                su - ${PGUSER} -c "@/usr/bin/initdb@ --pgdata=${PGDATA} > /dev/null 2>&1" < /dev/null
+
+                exec test -f ${PGDATA}/PG_VERSION
+            fi
+        };
+}
+
+daemon daemon/postgres {
+        need = system/bootmisc;
+        use = daemon/postgres/initdb;
+
+#ifd pingwinek
+        env PGDATA=/srv/pgsql;
+#elsed
+        env PGDATA=/var/lib/postgresql/data;
+#endd
+        env PGUSER=postgres;
+        env PGGROUP=postgres;
+        env PGLOG=${PGDATA}/postgresql.log;
+        env PGOPTS=-p5432;
+#ifd gentoo
+        env_file = /etc/conf.d/postgresql;
+#endd
+
+        suid = ${PGUSER};
+        sgid = ${PGGROUP};
+        pid_file = ${PGDATA}/postmaster.pid;
+        script daemon = {
+                @/usr/bin/pg_ctl@ -p@/usr/bin/postmaster@ -D"${PGDATA}" -s -l"${PGLOG}" -o"${PGOPTS}" start
+};
+        exec kill = @/usr/bin/pg_ctl@ -D${PGDATA} -s -m fast stop;
+        forks;
+}
+#endd

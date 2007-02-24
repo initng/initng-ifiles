@@ -1,0 +1,11 @@
+# NAME: xinetd
+# DESCRIPTION: inetd replacement
+# WWW: http://www.xinetd.org
+
+daemon daemon/xinetd {
+	need = system/bootmisc virtual/net;
+#ifd gentoo
+	env_file = /etc/conf.d/xinetd;
+#endd
+	exec daemon = @/usr/sbin/xinetd@ -dontfork ${XINETD_OPTS};
+}

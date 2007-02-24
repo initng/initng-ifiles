@@ -1,0 +1,81 @@
+#!/bin/bash
+# Copyright (c) 2004-2005 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+# Contributed by Roy Marples (uberlord@gentoo.org)
+
+action="$1"
+
+. ${INITNG_PLUGIN_DIR}/scripts/net/functions
+. "${libdir}/system"
+
+# Bring the interface up
+interface_is_up "${interface}" || interface_up "${interface}"
+
+case "${action}" in
+	"bound"|"renew")
+		# We handle these actions below
+		;;
+	"deconfig")
+		interface_del_addresses "${interface}"
+		if [[ ${auto_interface} == "yes" ]]; then
+			remove_state "${interface}"
+			interface=$( best_interface )
+			apply_state "${interface}"
+		fi
+		echo "${action}"
+		exit 0
+		;;
+	"nak"|"leasefail")
+		exit 0
+		;;
+	*)
+		echo "We don't handle the action \"${action}\"" >&2
+		exit 1
+		;;
+esac
+
+# Configure our IP address
+ip=${ip// }
+subnet=${subnet// }
+cidr=$( netmask2cidr ${subnet} )
+broadcast=${broadcast// }
+[[ -n ${broadcast} ]] && broadcast="broadcast ${broadcast}"
+
+# If we don't have our address then we flush it and then add our new one
+curip=$( interface_get_address ${interface} )
+if [[ ${curip} != "${ip}/${cidr}" ]] ; then
+	interface_del_addresses ${interface}
+	interface_add_address ${interface} "${ip}/${cidr}" ${broadcast}
+fi
+
+# Store the address in a cache for future usage
+echo ${ip} > /var/cache/dhcp-${interface}.lease
+chmod 600 /var/cache/dhcp-${interface}.lease
+
+# Configure our default route - we only have 1 default route
+for r in ${router}; do
+	interface_default_route ${interface} ${r} ${metric:-0} && break
+done
+
+# Configure our hostname - but only if we need it
+if [[ -n ${hostname} ]]; then
+	x=$( /bin/hostname )
+	[[ ${x} == "(none)" || ${x} == "localhost" ]] && /bin/hostname "${hostname}"
+fi
+
+# Only setup the information we're told to
+# By default that's everything
+eval dhcp=\" \$\{dhcp_${ifvar}\} \"
+[[ ${dhcp} != *' nodns '* ]] && system_dns
+[[ ${dhcp} != *' nontp '* ]] && system_ntp
+[[ ${dhcp} != *' nonis '* ]] && system_nis
+
+if [[ ${auto_interface} == "yes" ]]; then
+	save_state ${interface}
+	interface=$( best_interface )
+	apply_state ${interface}
+fi
+
+echo "${action}"
+exit 0

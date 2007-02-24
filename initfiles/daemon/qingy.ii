@@ -1,0 +1,23 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/qingy/1 {
+	need = system/bootmisc;
+	provide = virtual/getty/1;
+	exec daemon = @/sbin/qingy@ tty1;
+	respawn;
+	last;
+}
+
+daemon daemon/qingy/* {
+	need = system/bootmisc;
+	provide = virtual/getty/${NAME};
+	exec daemon = @/sbin/qingy@ tty${NAME};
+	respawn;
+}
+
+virtual daemon/qingy {
+	need = daemon/qingy/2 daemon/qingy/3 daemon/qingy/4 daemon/qingy/5 daemon/qingy/6;
+	use = system/mountfs/essential service/issue;
+}

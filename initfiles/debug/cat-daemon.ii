@@ -1,0 +1,4 @@
+daemon debug/cat-daemon {
+	respawn = yes;
+	exec daemon = @/bin/sleep@ 10;
+}

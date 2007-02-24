@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/netdaemon {
+	need = system/bootmisc;
+	use = system/coldplug system/modules;
+	exec daemon = @/usr/sbin/netdaemon@;
+	pid_of = netdaemon;
+}

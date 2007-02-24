@@ -1,0 +1,16 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/klogd {
+	need = system/bootmisc daemon/syslogd;
+	stdall = /dev/null;
+	daemon_stops_badly;
+#ifd debian
+	env KLOGD_OPTIONS = "";
+	env_file = /etc/default/klogd;
+	exec daemon = @/usr/sbin/klogd@ /u -n ${KLOGD_OPTIONS};
+#elsed
+	exec daemon = @/usr/sbin/klogd@ -n -c 1;
+#endd
+}

@@ -1,0 +1,24 @@
+# NAME: MLDonkey
+# DESCRIPTION: Multi-network P2P client.
+# WWW: http://mldonkey.sourceforge.net/Main_Page
+
+daemon daemon/mldonkey {
+	env MLDONKEY_DIR=/home/p2p/mldonkey;
+	env USER=p2p;
+	env NICE=1;
+	env LOG=/var/log/mldonkey.log;
+	env_file = /etc/conf.d/mldonkey;
+
+	need = system/bootmisc virtual/net;
+	suid = ${USER};
+	nice = ${NICE};
+	respawn = yes;
+	stdall = ${LOG};
+
+	exec daemon = @/usr/bin/mlnet@;
+	script kill = {
+		echo kill | @/usr/bin/netcat:/usr/bin/telnet@ 127.0.0.1 4000 >/dev/null
+		@pkill@ mlnet
+		exec [ ${?} -le 1 ]
+	};
+}

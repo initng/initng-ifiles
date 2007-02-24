@@ -1,0 +1,133 @@
+#!/bin/bash
+
+#
+# Search for libgenrunlevel
+#
+LIB="${0%/*}/libgenrunlevel"
+[ -d "${LIB}" ] || LIB="@LIB_INSTALL_DIR@"
+LIB="${LIB}/libgenrunlevel"
+
+if [ ! -e "${LIB}" ]; then
+	echo "ERROR: ${LIB} not found!"
+	exit 1
+fi
+
+#
+# Show the help
+#
+function show_help {
+cat >&2 << EOF
+USAGE:
+${0} [options] [--all | runlevel1 runlevel2 ... runlevelN]
+${0} --migrate
+${0} --help
+
+options:
+--overwrite       Overwrite files if they exist.
+--path PATH       Sets the search path for executables.
+--destdir PATH    Destination path prefix (default: /).
+--confdir PATH    Configuration directory (default: /etc/initng).
+
+EOF
+}
+
+
+#
+# Load libgenrunlevel
+#
+. "${LIB}"
+
+migrate=
+
+[ ${#} -eq 0 ] && set -e -- -help
+
+while [ ${#} -gt 0 ]; do
+	case "${1}" in
+	--all)
+		all=true
+		;;
+	--overwrite)
+		overwrite=true
+		;;
+	--dist)
+		shift
+		dist=${1}
+		;;
+	--path)
+		shift
+		search_path=${1}
+		;;
+	--destdir)
+		shift
+		DESTDIR=${1}
+		;;
+	--confdir)
+		shift
+		CONFDIR=${1}
+		;;
+	--help)
+		show_help
+		exit 0
+		;;
+	--migrate)
+		migrate=1
+		;;
+	--)
+		shift
+		break
+		;;
+	*)
+	 	break
+	 	;;
+	esac
+	shift
+done
+
+[ "${CONFDIR}" ] || CONFDIR="${DESTDIR}/etc/initng"
+mkdir -p "${CONFDIR}"
+
+if [ -n "${migrate}" ]; then
+	RUNLEVELDIR="${CONFDIR}/runlevel"
+
+	if [ -e "${RUNLEVELDIR}/system.virtual" ]; then
+		CONFDIR="${RUNLEVELDIR}"
+	else
+		install -d -m 755 -o root -g root "${RUNLEVELDIR}"
+	fi
+
+	[ -e "${CONFDIR}/system.virtual" ] || exit 1
+
+	for RUNLEVEL_FILE in "${CONFDIR}"/*.{runlevel,virtual}; do
+		cp "${RUNLEVEL_FILE}"{,.old}
+		while read SERVICE; do
+			if [ -e "${CONFDIR}/${SERVICE}.virtual" -o -e "${CONFDIR}/${SERVICE}.runlevel" ]; then
+				SERVICE="runlevel/${SERVICE}"
+			elif [ ! -e "${CONFDIR}/${SERVICE}.i" ]; then
+				NSERVICE="$(find "${CONFDIR}" -name $(basename "${SERVICE}").i | sed -r "s:^${CONFDIR}/(.*)\.i\$:\1:; s:\s::g")"
+				[ -n "${NSERVICE}" ] && SERVICE="${NSERVICE}"
+			fi
+			echo "${SERVICE}"
+		done < "${RUNLEVEL_FILE}.old" > "${RUNLEVELDIR}/$(basename "${RUNLEVEL_FILE}")"
+	done
+	exit 0
+fi
+
+[ "${search_path}" ] || search_path=$(echo $(
+	for dir in $()/bin /sbin /usr/bin /usr/sbin /usr/kde/\*/bin \
+			/usr/kde/\*/sbin /opt/bin /opt/sbin /opt/\*/bin \
+			/opt/\*/sbin /usr/local/sbin /usr/local/bin
+	do [ "$(echo ${dir})" ] && echo ${dir}
+	done | grep -v '*')
+)
+
+[ "${all}" ] && set -- $(get_runlevels)
+
+for l; do
+	create_list ${l}
+done
+
+for rl in ${runlevels}; do
+	write_runlevel ${rl} > "${CONFDIR}/runlevel/${rl}"
+done
+
+echo "Done generating files."

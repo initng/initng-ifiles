@@ -1,0 +1,19 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service service/fbsplash/start {
+	need = system/initial;
+	exec start = ${INITNG_PLUGIN_DIR}/scripts/splash/fbsplash.sh start;
+	exec stop = ${INITNG_PLUGIN_DIR}/scripts/splash/fbsplash.sh shutdown;
+}
+
+service service/fbsplash/stop {
+	need = system/initial;
+	just_before = daemon/gdm daemon/kdm daemon/xdm daemon/wdm daemon/entranced;
+	exec start = ${INITNG_PLUGIN_DIR}/scripts/splash/fbsplash.sh stop;
+}
+
+virtual service/fbsplash {
+	need = service/fbsplash/start service/fbsplash/stop;
+}

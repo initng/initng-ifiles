@@ -1,0 +1,30 @@
+#!/bin/bash
+# Copyright (c) 2005 Gentoo Foundation 
+# Distributed under the terms of the GNU General Public License v2
+
+# Contributed by Roy Marples <uberlord@gentoo.org>
+
+essidnet_start() {
+	local mod func evars evar vars x i mvars mac=$( wireless_get_ap_mac_address ${iface} )
+	local ifvar=$( bash_variable ${iface} )
+	local ESSID=$( wireless_get_essid ${iface} )
+	local essid=$( bash_variable ${ESSID} )
+	mac=${mac//:/}
+
+	vebegin "Configuring ${iface} for \"${ESSID//\\\\/\\\\}\"" 2>/dev/null
+
+	for mod in interface system; do
+		func="${mod}_get_vars"
+		evars=( $( ${func} ${essid} ) )
+		mvars=( $( ${func} ${mac} ) )
+		vars=( $( ${func} ${ifvar} ) )
+		for ((i = 0; i<${#mvars[@]}; i++)); do
+			eval x=( \"\$\{mac_${mvars[i]}\[@\]\}\" )
+			[[ -z ${x} ]] && eval x=( \"\$\{${evars[i]}\[@\]\}\" )
+			[[ -n ${x} ]] && eval "${vars[i]}=( "\"\$\{x\[@\]\}\"" )"
+		done
+	done
+
+	veend 0 2>/dev/null
+	return 0
+}

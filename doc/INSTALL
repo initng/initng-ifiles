@@ -1,0 +1,90 @@
+Installation Instructions
+*************************
+
+For the most up-to-date installation instructions, please refer to the initng
+wiki: http://www.initng.org/wiki/Installation
+
+Note: GNU autotools support has been completely removed, you will need CMake
+version 2.2.0 or later for installation.
+
+
+SYSTEM REQUIREMENTS
+===================
+* A computer running linux (support for BSD-based operating systems is under
+development) on one of the following architectures: alpha, amd64, hppa, i386,
+ia64, m68k, mips, mipsel, ppc, sparc. (others may or may not work).
+* GNU GCC 3.4.x, 4.0.x or 4.1.x
+* CMake 2.2.0 or newer
+* ncurses development libs (optional)
+
+
+COMPILING IFILES
+================
+To avoid any potential problems during compilation, you need to create a
+'build' directory for compiled code after unpacking the tarball.
+
+--Release versions
+# tar zxvf initng-ifiles-version.tar.gz
+# cd initng-ifiles-version
+# mkdir build
+# cd build
+
+--SVN Trunk
+# svn co https://svn.initng.org/initng-ifiles/trunk initng-ifiles
+# cd initng
+# mkdir build
+# cd build
+
+Run cmake (replaces ./configure).  Note if you need to manually disable plugins
+it can be done here.
+
+# cmake .. [-DPLUGIN_NAME={ON|OFF}]
+(PLUGIN_NAME will be of the form BUILD_NGCS)
+
+To faciliate easier selection of plugins, cmake offers an ncurses-based menu,
+which is accessed with 'ccmake'
+
+# ccmake ..
+
+To compile initng, run 'make' in the usual manner
+
+# make
+
+Obtain root priveledges in the standard manner for your distribution, and run
+'make install' to install initng.
+
+# make install
+
+
+RUNLEVEL(S) CONFIGURATION
+=========================
+If you are installing initng for the first time, you can use genrunlevel to
+automatically generate the default runlevel based on installed applications.
+
+# genrunlevel -all
+
+To add services to runlevels, you can edit the runlevel files with your
+favourite text editor: (note 'system' is technically no longer counted as a
+runlevel, you can still edit it this way, but do exercise caution).
+
+# vi /etc/initng/default.runlevel
+# vi /etc/initng/system.virtual
+
+Alternately, ng-update has been provided to make the process easier.  For
+example, to start sound on boot and save mixer settings on shutdown/restore on
+boot, you would run:
+
+# ng-update add system/alsasound default
+# ng-update add system/alsasound/mixerstate default
+
+Or to run hdparm:
+
+# ng-update add system/hdparm default
+
+To remove a service:
+
+# ng-update del system/alsasound default
+
+To list services in a runlevel:
+
+# ng-update show default

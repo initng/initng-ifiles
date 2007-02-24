@@ -1,0 +1,49 @@
+# NAME: D-Bus
+# DESCRIPTION: Application communication framework
+# WWW: http://dbus.freedesktop.org/
+
+daemon daemon/dbus {
+	need = system/bootmisc;
+	forks;
+#ifd fedora altlinux mandriva
+	pid_file = /var/run/messagebus.pid;
+#elsed debian pingwinek
+	env DAEMONUSER=messagebus;
+	env PIDDIR = /var/run/dbus;
+	env PIDFILE = ${PIDDIR}/pid;
+	env_file = /etc/default/dbus;
+	pid_file = ${PIDFILE};
+#elsed
+	pid_file = /var/run/dbus.pid;
+#endd
+#ifd debian
+	script daemon = {
+		[ "${ENABLED}" = 0 ] && exit 0
+
+		#Debian and Ubuntu are using different files
+		DAEMON=/usr/bin/dbus-daemon
+
+		if [ ! -d ${PIDDIR} ]
+		then
+			@mkdir@ -p ${PIDDIR}
+			chown ${DAEMONUSER} ${PIDDIR}
+			chgrp ${DAEMONUSER} ${PIDDIR}
+		fi
+		if [ -e ${PIDFILE} ]
+		then
+			PIDDIR=/proc/`@cat@ ${PIDFILE}`
+			if [ -d ${PIDDIR} -a  "`readlink -f ${PIDDIR}/exe`" = "${DAEMON}" ]
+			then
+				echo "${DESC} already started; not starting."
+			else
+				echo "Removing stale PID file ${PIDFILE}."
+				@rm@ -f ${PIDFILE}
+			fi
+		fi
+
+		exec ${DAEMON} --system ${PARAMS}
+	};
+#elsed
+	exec daemon = @/bin/dbus-daemon:/usr/bin/dbus-daemon:/usr/bin/dbus-daemon-1@ --system --fork;
+#endd
+}

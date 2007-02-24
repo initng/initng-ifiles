@@ -1,0 +1,10 @@
+# NAME: atd
+# DESCRIPTION: Scheduler with functionality similar to cron
+# WWW: ftp://jurix.jura.uni-sb.de/pub/jurix/source/chroot/appl/at/
+
+daemon daemon/atd {
+	need = system/bootmisc;
+	exec daemon = @/usr/sbin/atd@;
+	pid_file = /var/run/atd.pid;
+	forks;
+}

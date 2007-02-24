@@ -1,0 +1,28 @@
+.TH "install_service" "8" "" "" ""
+.SH "NAME"
+install_service \- install \fIinitng\fR's .ii files
+.SH "SYNOPSIS"
+\fBinstall_service\fR \fI\-\-in\fR|\fI\-i\fR [\fI\-\-out\fR|\fI\-o\fR] [\fI\-\-dist\fR|\fI\-d\fR] 
+.SH "DESCRIPTION"
+\fBinstall_service\fR parses files (normally .ii files) and sets distribution dependent values.
+.SH "OPTIONS"
+.TP 
+\fB\-\-in, \-i\fR
+Set the file which should be parsed.
+.TP 
+\fB\-\-out, \-o\fR
+Set the file the ouptput should be saved to. If this option is not set output goes to stdout.
+.TP 
+\fB\-\-dist, \-d\fR
+Set the distribution you want to install the file for (e.g. debian, gentoo, fedora). If this option is not set \fIinstall_service\fR will try to guess the distribution.
+.SH "SEE ALSO"
+.BR initng(8)
+.BR ngc(8),
+.BR ngdc(8),
+.BR ng\-update(8),
+.BR gen_system_runlevel(8),
+.BR system_off(8).
+.SH "AUTHOR"
+initng was written by  Jimmy Wennlund <jimmy.wennlund@gmail.com> and can be found at http://www.initng.org/.
+.PP 
+This manual page was written by Armin Berres <a.berres@onlinehome.de>.

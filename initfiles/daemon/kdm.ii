@@ -1,0 +1,15 @@
+# NAME: KDM
+# DESCRIPTION: Graphical login manager for the K Desktop Environment (KDE)
+# WWW: http://www.kde.org/
+
+daemon daemon/kdm {
+	need = system/bootmisc;
+	conflict = daemon/gdm daemon/wdm daemon/xdm;
+	use = daemon/xfs system/modules system/coldplug service/faketty;
+	provide = virtual/dm;
+#ifd debian
+	exec daemon = @/usr/bin/kdm@ -nodaemon;
+#elsed
+	exec daemon = @/usr/sbin/kdm:/usr/bin/kdm@ -nodaemon;
+#endd
+}

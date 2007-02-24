@@ -1,0 +1,4 @@
+daemon daemon/bluetooth/pand {
+	need = system/bootmisc daemon/bluetooth/hcid;
+	exec daemon = @/usr/bin/pand@ --nodetach --listen --role NAP;
+}

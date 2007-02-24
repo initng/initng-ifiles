@@ -1,0 +1,5 @@
+virtual daemon/vmware {
+	need = system/bootmisc daemon/vmware/vmnet system/modules/vmmon;
+	use = daemon/vmware/vmware-serverd;
+	also_stop = daemon/vmware/vmnet;
+}

@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/mDNSResponder {
+	need = system/bootmisc virtual/net;
+	exec daemon = @/usr/sbin/mDNSResponder:/usr/bin/mDNSResponder@;
+	pid_file = /var/run/mDNSResponder.pid;
+	forks;
+}

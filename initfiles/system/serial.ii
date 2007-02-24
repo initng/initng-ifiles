@@ -1,0 +1,16 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service system/serial {
+	need = system/initial system/mountroot system/modules/serial;
+	script start = {
+		if [ -e /etc/serial.conf ]
+		then
+			@grep@ -v "^#\|^ \|^$" /etc/serial.conf | while read device args
+			do
+				@/bin/setserial@ -b ${device} ${args} 1>&2
+			done
+		fi
+	};
+}

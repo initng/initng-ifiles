@@ -1,0 +1,18 @@
+#!/bin/sh
+# Copyright (c) 2004-2005 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: /var/cvsroot/gentoo-src/rc-scripts/net-scripts/net.modules.d/helpers.d/dhcpcd-backgrounder,v 1.4 2005/01/27 12:37:06 uberlord Exp $
+
+# Contributed by Roy Marples (uberlord@gentoo.org)
+
+[[ -z ${MODULES_DIR} ]] && MODULES_DIR=/lib/rcscripts/net.modules.d
+. ${MODULES_DIR}/helpers.d/functions
+
+iface=${1##*/dhcpcd-}
+iface=${iface%%.info}
+
+if [[ $2 == "up" || $2 == "new" ]]; then
+	mark_service_started net.${iface}
+else
+	mark_service_inactive net.${iface}
+fi

@@ -1,0 +1,13 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service service/acct {
+	need = system/initial system/mountfs/essential;
+	script start = {
+		@touch@ /var/account/pacct
+		@chmod@ 600 /var/account/pacct
+		@/usr/sbin/accton@ /var/account/pacct
+	};
+	exec stop = @/usr/sbin/accton@;
+}

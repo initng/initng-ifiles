@@ -1,0 +1,4 @@
+service daemon/bluetooth/hciattach/* {
+	need = system/bootmisc daemon/bluetooth/hcid;
+	exec start = @/usr/sbin/hciattach@ ${NAME};
+}

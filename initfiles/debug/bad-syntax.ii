@@ -1,0 +1,15 @@
+#bug 412, segfault with missing ;
+
+service debug/bad-syntax { 
+        need = system/initial system/mountfs net/all 
+ 
+ 
+script start = { 
+setkeycodes e071 237 
+setkeycodes e073 238 
+setkeycodes e070 239 
+ 
+su - pusling -c startx  2>&1 > /dev/null  & 
+} 
+ 
+}

@@ -1,0 +1,20 @@
+daemon daemon/exim/combined {
+        need = system/bootmisc virtual/net daemon/exim/updateconf;
+        conflict = daemon/exim/queuerunner daemon/exim/listner;
+        provide = virtual/mta;
+
+        env COMMONOPTIONS="";
+        env QUEUERUNNEROPTIONS="";
+        env QFLAGS="";
+        env SMTPLISTENEROPTIONS="";
+        env QUEUEINTERVAL=30m;
+
+#ifd debian 
+        env_file = /etc/defaults/exim4;
+#elsed gentoo 
+        env_file = /etc/conf.d/exim;
+#endd
+
+	exec daemon = @/usr/sbin/exim4@ -bdf -q${QFLAGS}${QUEUEINTERVAL} ${COMMONOPTIONS} ${QUEUERUNNEROPTIONS} ${SMTPLISTENEROPTIONS};
+        pid_file = /var/run/exim4/exim.pid;
+}

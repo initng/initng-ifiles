@@ -1,0 +1,346 @@
+What is a .i file?
+
+A .i file is a file that lets you start a service or program easily by using
+the ngc or ng-update commands.
+
+
+
+Where are they located?
+
+The .i files are located in the /etc/initng directory or subdirectories such
+as /etc/initng/system or /etc/initng/daemon.
+
+
+
+Why would I want to edit or make one of these files?
+
+Well the reason is simple what if you would like to have a program start on
+startup but currently there is no script for it. Or a program won't start
+yet there is a script so soon you will have the skills to edit and fix these
+files.
+
+Notice: the file must end in .i or initng will not see it!
+
+
+
+What can you define in .i files?
+
+Two different things: daemons and services.
+
+* a service is something that is only run once and then terminates. examples
+  are: mount something, set the hostname, bring the network up, ...
+
+* in contrary, a daemon is a program thats being started and runs all the
+  time. for example apache, cups, ...
+
+The first thing you need to do is to figure out what you want to write: an
+.i file for a service or a daemon?
+
+
+
+How do I define a service ?
+
+A service might look like this:
+
+    service system/foo {
+        need = system/initial system/mountfs;
+        use = system/alsasound;
+        exec start = /sbin/foo --bar --baz;
+    }
+
+The first line says that this service requires system/initial and
+system/mountfs to be run before it can be started.
+
+The second line says that it should also wait for system/alsasound is also
+in the current runlevel, then it should also wait for system/alsasound. But
+if system/alsasound is NOT in the current runlevel, this line would be
+ignored. in contrary, if it would have said need = system/alsasound, then
+system/alsasound would also have been started even if it is not in the
+current runlevel.
+
+The third line gives the program to start, in this case /sbin/foo. It will
+be called with the parameters "--bar --baz".
+
+Ok, now can also have a service that does something on start and on
+shutdown. it would look like this:
+
+    service system/foo {
+        need = system/initial system/mountfs;
+        use = system/alsasound;
+        exec start = /sbin/foo --bar --baz;
+        exec stop = /sbin/foo -qux --quux;
+    }
+
+Here, the stop and stop_args lines have been added. pretty easy. But there
+are situations in which you can not use some simple program, but you need a
+shell script. One solution would be to write that shell script into a file,
+and have a line like "exec start = /path/to/my/script.sh". While i would
+suggest you to do that for really large scripts (>100 lines), it would be
+kind an overkill to do so for a script with 5 lines of code. So initng
+provides a possibility to include these scripts .i files. An example:
+
+    service system/foo {
+        need = system/initial system/mountfs;
+        use = system/alsasound;
+        script start = {
+            [ -f /etc/conf.d/foo.conf ] && source /etc/conf.d/foo.conf
+            [ -z "$FOO" ] & FOO="bar baz"
+            /sbin/foo $FOO
+        };
+    }
+
+Note that you could also have stop script-block that is executed on
+shutdown. this block would be named, you guessed it, script stop { }.
+
+
+
+How do I define a daemon?
+
+A basic daemon .i file might look like this:
+
+    daemon daemon/vixie-cron {
+        need = system/initial system/clock system/mountfs system/bootmisc;
+        exec daemon = /usr/sbin/cron -n;
+    }
+
+it starts with "daemon daemon/blah {", and has a "exec daemon =" line in it.
+The "exec daemon =" specifies the daemon executable.
+
+A daemon doesn't have "exec start", "exec stop" or "exec_args stop"
+directives, but has just an "exec daemon" directive. All other directives
+are the same as with services.
+
+
+
+How to handle forking daemons?
+
+initng will by default track what the daemons are doing, i.e. it will
+monitor if a daemon crashes, etc. Unfortunately, some daemons have a bad
+habit: forking.
+
+When a daemon forks, it spawns a copy of itself with a new pid. Then the
+father process, with the old pid, dies.
+
+This has some advantages: if you start cron from your console, then you
+instantly will see the bash prompt again. Thats why most daemons fork.
+
+Unfortunately, initng has up to now no possibility to know if a daemon
+spawns a child or not. initng will only notice that the father process dies,
+and thinks that the daemon died.
+
+Fortunately most daemons have a commandline switch which makes them not
+forking. In the case of vixie-cron it is "-n". Consult your daemons manpage.
+
+In some cases, the daemon can't be prevented from forking, but it will write
+the PID of the child process in a file, called the pid-file. initng can use
+the PID file to track the daemon. An example:
+
+    daemon daemon/ntpd {
+        need = system/bootmisc
+        require_network;
+        use = daemon/ntpdate;
+        exec daemon = /usr/sbin/ntpd -p /var/run/ntpd.pid;
+        pid_file = /var/run/ntpd.pid;
+	forks;
+    }
+
+This daemon WILL fork, but it will write the PID of the doughter process in
+/var/run/ntpd.pid. initng can also track this daemon.
+
+Another thing you can see is the require_network directive. This will delay
+the starting of this daemon until a network device is set up.
+
+In a very bad case, a deamon might provide neither a switch to disable
+forking, nor will it write the PID of the forked process to a pidfile. for
+this case, initng has the possibility to look for a process by its name, as
+shown in this example:
+
+    daemon daemon/portmap {
+        need = system/bootmisc;
+        require_network;
+	forks;
+        pid_of = portmap;
+        exec daemon = /sbin/portmap;
+    }
+
+portmap will fork, but will write no pidfile. When the father process dies,
+initng will look for an process named "portmap", and if one exists, it will
+use it's PID.
+
+
+
+What fork tracking should I use?
+
+Always use this order:
+
+1) try to prevent the daemon from forking at all
+2) if 1) is not possible, try to use pid_file
+3) only if 1) and 2) are not possible, use pid_of
+
+
+
+What should I 
+
+ok, what's the buzz when you need some shell script to bring up the daemon?
+Have a look at this example:
+
+    daemon daemon/oidentd {
+        need = system/initial system/mountroot;
+        env OIDENT_OPTIONS=;
+        env OIDENT_USER=nobody;
+        env OIDENT_GROUP=nogroup;
+        env_file = /etc/default/oidentd;
+        require_network;
+        script daemon = {
+            if [ "${OIDENT_BEHIND_PROXY}" = "yes" ]
+            then
+                # If we have a default router, then allow it to proxy auth requests to us
+                GATEWAY=`netstat -nr | /usr/bin/awk'/^0.0.0.0/{print $2}'`
+                [ -n "${GATEWAY}" ] && OIDENT_OPTIONS="${OIDENT_OPTIONS} -P ${GATEWAY}"
+            fi
+            exec /usr/sbin/oidentd -i ${OIDENT_OPTIONS} -u ${OIDENT_USER} -g ${OIDENT_GROUP}
+        };
+    }
+
+As you can see you can also embed an "script daemon = { script };" bash
+script in an .i file. But notice the "exec blah" statement. When you write
+"exec blah" in an bash script, the blah process will REPLACE the bash
+process, inheriting it's PID. This is necessary, so that initng can track
+your service. If you use pid_file, it is not absolutely necessary, but i'd
+suggest to do so.
+
+
+
+
+A note about other directives
+
+This should give an incomplete list of the other directives not explained
+above. You can get a list of most available options with a short description
+of their purpose and required parameters if you type "ngc -O".
+
+
+require_network:
+
+The start service or daemon is delayed until a network device other then lo
+is configured.
+
+
+last:
+
+The start service or daemon is delayed until all services and daemons, which
+are not last, are started.
+
+
+respawn:
+
+If the daemon dies, it will be restarted.
+
+
+
+How to name the .i file?
+
+initng will look for the service "daemon/something" in
+"/etc/initng/daemon/something.i". So the example above has to go into
+"/etc/initng/daemon/oidentd.i".
+
+
+
+What are virtual blocks?
+
+Have a look at daemon/agetty.i:
+
+    daemon daemon/agetty/tty1 {
+        need = system/mountfs;
+        exec daemon = /sbin/agetty;
+        exec_args daemon = 38400 ${NAME};
+        respawn;
+        last;
+    }
+
+    daemon daemon/agetty/* {
+        need = system/mountfs;
+        exec daemon = /sbin/agetty;
+        exec_args daemon = 38400 ${NAME};
+        respawn;
+    }
+
+    virtual daemon/agetty {
+        need = daemon/agetty/tty1 daemon/agetty/tty2 daemon/agetty/tty3 daemon/agetty/tty4 daemon/agetty/tty5 daemon/agetty/tty6;
+        use = system/mountfs system/netmount;
+    }
+
+The first block will define a daemon "daemon/agetty/tty1".
+
+The second block defines "daemon/agetty/*". Now what is this? This block
+contains a wildcard. When you tell initng to start daemon/agetty/foo, this
+block will match it, so initng will use this block.
+
+You might notice the shell-style ${NAME} keyword. This keyword will be
+replaced by initng with the actual name of the service.
+
+NOTE: ${NAME} won't be "deamon/agetty/tty1" or the like, but it WILL be
+"tty1"
+
+This is useful for things like getty's, AND for things like network daemons
+that bind to individual interfaces. See daemon/<your favourite dhcp-client>
+for an example.
+
+The third block is a virtual block. As you can see, there is neither a
+script, nor a exec statement in this block. So the virtual's don't do very
+much, the only thing they do is to depend on something, in this case in
+/daemon/agetty/tty1 to tty6. This way, the user only needs to add
+daemon/agetty to his runlevel, and he gets all those agettys. After all
+agettys were started, daemon/agetty gets the status DONE.
+
+The order of the three blocks is of importance.
+
+The first block should be in the file before the second one. When initng
+trys to find daemon/agetty/tty1 it will first find the first block, which
+matches, and executes this block.
+
+If the order of the block 1 and 2 was reversed, initng would first find the
+"daemon/agetty/*" block, which ALSO matches "deamon/agetty/tty1", and
+execute this block - this is not the desired behaviour.
+
+The third block should be the last block for one reason: if the user adds
+daemon/agetty to his/her default runlevel, initng will look for this
+specific .i file, and parse it until it found daemon/agetty. It will stop
+after it has parsed the daemon/agetty{} block. Any other block in the .i
+file up to this block will ALSO be parsed and added to initng's internal
+database. So, the other two blocks will already be parsed when they are
+needed.
+
+
+
+How do I test my new .i file?
+
+After you have written your .i file, it may still contain syntax errors. So
+it's better not to shoot directly with "ngc -u daemon/mydaemon", but first
+do some tests with it.
+
+The first step is to check for syntax errors. You can use the ./test_parser
+inside the devtool directory of the initng source distribution.
+
+After you have installed your .i file in the correct location (usually
+/etc/initng/system/ or /etc/initng/daemon/), just run "./test_parser
+daemon/mydaemon". If you don't wan't to dig through it's output, you can
+check it's exit status with "echo $?". if the exit status is 2, an error has
+occurred. otherwise, it is 0.
+
+The next thing you might try is to see if your .i file works. I'd
+suggest you doing so by using initng in fake mode:
+
+a) launch initng (as root). this will bring up another initng instance in
+   the so called fake mode.
+
+b) comment all "need=" "require=" lines in your .i file.
+
+c) do "ngdc -u daemon/mydaemon", and see what happens. If something doesn't
+   work, and you need to change something in the .i file, just kill initng
+   (the fake instance, of course!), edit your file and start with a).
+
+d) If you are satisfied with your work, kill the fake instance, uncomment
+   the "need=" and "require=" statements, and do "ngc -u daemon/mydaemon"
+
+e) If possible share your .i file with us! Either send it to the mailing
+   list, post it in bugzilla, or talk to one of us in the IRC!

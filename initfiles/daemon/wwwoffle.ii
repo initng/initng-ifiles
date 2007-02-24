@@ -1,0 +1,21 @@
+# NAME: WWWOFFLE
+# DESCRIPTION: Simple proxy with some nice features, very useful for dial-up
+#              internet links.
+# WWW: http://www.gedanken.demon.co.uk/wwwoffle/
+
+daemon daemon/wwwoffle {
+	need = system/bootmisc;
+	stdall = /var/log/wwwoffle.log;
+	respawn;
+	env CONFIG=/etc/wwwoffle/wwwoffle.conf;
+
+	exec daemon = @wwwoffled@ -c ${CONFIG} -d;
+}
+
+service daemon/wwwoffle/online {
+	need = daemon/wwwoffle virtual/net;
+	env CONFIG=/etc/wwwoffle/wwwoffle.conf;
+
+	exec start = @wwwoffle@ -online -c ${CONFIG};
+	exec stop = @wwwoffle@ -offline -c ${CONFIG};
+}

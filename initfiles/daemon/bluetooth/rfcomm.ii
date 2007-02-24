@@ -1,0 +1,5 @@
+service daemon/bluetooth/rfcomm {
+	need = system/bootmisc daemon/bluetooth/hcid;
+	exec start = @/usr/bin/rfcomm@ -f /etc/bluetooth/rfcomm.conf bind all;
+	exec stop = @/usr/bin/rfcomm@ -f /etc/bluetooth/rfcomm.conf release all;
+}

@@ -1,0 +1,4 @@
+service debug/test-execve {
+	execve = @/bin/ls@;
+	execve_args = -l;
+}

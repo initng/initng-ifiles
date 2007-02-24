@@ -1,0 +1,15 @@
+# NAME: powernowd
+# DESCRIPTION: CPU clock/voltage adjustment daemon
+# WWW: http://www.deater.net/john/powernowd.html
+
+daemon daemon/powernowd {
+	need = system/bootmisc;
+	use = service/speedstep;
+#ifd debian
+	env OPTIONS = -q -m 2;
+	env_file = /etc/default/powernowd;
+	exec daemon = @/usr/sbin/powernowd@ ${OPTIONS};
+#elsed
+	exec daemon = @/usr/sbin/powernowd@ -q;
+#endd
+}

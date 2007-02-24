@@ -1,0 +1,14 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service system/binfmt {
+	need = system/bootmisc;
+	script start = {
+		@grep@ '^\s*#' /etc/binfmt | @grep@ '^\s*$' | while read line
+		do
+			@sysctl@ -n -w fs.binfmt_misc.register="${line}"
+		done
+	};
+	exec stop = @sysctl@ -n -w fs.binfmt_misc.status=-1;
+}

@@ -1,0 +1,9 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/ipw3945d {
+	need = system/bootmisc system/mountfs/essential system/modules/ipw3945;
+
+	exec daemon = @/sbin/ipw3945d@ --foreground --timeout=10 --quiet;
+}

@@ -1,0 +1,11 @@
+# NAME: vsftpd
+# DESCRIPTION: Very Secure FTP Daemon
+# WWW: http://vsftpd.beasts.org
+
+daemon daemon/vsftpd {
+	need = system/bootmisc virtual/net/lo;
+	use = virtual/net;
+	exec daemon = /usr/sbin/vsftpd;
+	pid_of = vsftpd;
+	forks;
+}

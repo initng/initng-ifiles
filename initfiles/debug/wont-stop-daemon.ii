@@ -1,0 +1,6 @@
+daemon debug/wont-stop-daemon {
+	script daemon = {
+		trap 'echo "got sigterm"' SIGTERM
+		@cat@
+	};
+}

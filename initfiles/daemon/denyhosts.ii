@@ -1,0 +1,20 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+#atdefpath /usr/bin
+daemon daemon/denyhosts {
+	need = system/bootmisc;
+	use = daemon/sshd daemon/syslog-ng;
+#ifd fedora
+	script daemon = {
+		export HOSTNAME=$(@/bin/hostname@)
+		exec @/usr/bin/denyhosts.py@ --daemon --config /etc/denyhosts.conf
+	};
+	pid_file = /var/lock/subsys/denyhosts;
+#elsed
+	exec daemon = @denyhosts@ --daemon -c /etc/denyhosts.conf;
+	pid_file = /var/run/denyhosts.pid;
+#endd
+	forks;
+}

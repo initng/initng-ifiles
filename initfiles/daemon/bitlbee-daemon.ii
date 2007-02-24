@@ -1,0 +1,14 @@
+# NAME: BitlBee
+# DESCRIPTION: IM (AIM/MSN/Jabber/Yahoo IM) to IRC gateway (daemon mode)
+# WWW: http://www.bitlbee.org
+
+daemon daemon/bitlbee-daemon {
+	suid = nobody;
+	sgid = nobody;
+	conflict = daemon/bitlbee-bitlbeed;
+	need = system/bootmisc virtual/net;
+	exec daemon = /usr/sbin/bitlbee;
+	respawn;
+	forks;
+	pid_of = bitlbee;
+}

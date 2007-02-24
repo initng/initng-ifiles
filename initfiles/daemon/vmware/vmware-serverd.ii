@@ -1,0 +1,4 @@
+daemon daemon/vmware/vmware-serverd {
+	need = system/bootmisc daemon/vmware/vmnet system/modules/vmmon;
+	exec daemon = @/opt/vmware/server/sbin/vmware-serverd@;
+}

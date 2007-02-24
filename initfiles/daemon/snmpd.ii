@@ -1,0 +1,16 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/snmpd {
+	need = system/bootmisc virtual/net;
+	env CONFFILE=/etc/snmp/snmpd.conf;
+	env PIDFILE=/var/run/snmpd.pid;
+	env OPTIONS=-Lsd -a;
+#ifd fedora mandriva
+	env_file = /etc/snmp/snmpd.options;
+#endd
+	pid_file = ${PIDFILE};
+	forks;
+	exec daemon = @/usr/sbin/snmpd@ ${OPTIONS} -c ${CONFFILE} -p ${PIDFILE};
+}

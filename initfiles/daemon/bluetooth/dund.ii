@@ -1,0 +1,4 @@
+daemon daemon/bluetooth/dund {
+	need = system/bootmisc daemon/bluetooth/hcid daemon/bluetooth/sdpd;
+	exec daemon = @/usr/bin/dund@ --listen --persist --nodetach;
+}

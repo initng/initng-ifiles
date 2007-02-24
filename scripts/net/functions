@@ -1,0 +1,276 @@
+#!/bin/bash
+# Copyright (c) 2005 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+
+# Contributed by Roy Marples <uberlord@gentoo.org>
+
+# char* interface_device(char *iface)
+#
+# Gets the base device of the interface
+# Can handle eth0:1 and eth0.1
+# Which returns eth0 in this case
+interface_device() {
+	local dev="${1%%.*}"
+	[[ ${dev} == $1 ]] && dev="${1%%:*}"
+	echo "${dev}"
+}
+
+# char* interface_type(char* iface)
+#
+# Returns the base type of the interface
+# eth, ippp, etc
+interface_type() {
+	echo "${1%%[0-9]*}"
+}
+
+# void save_state(char *interface)
+#
+# Saves state information regarding the interface
+save_state() {
+        local iface="$1"
+        local d="${svcdir}/state/${iface}"
+
+        [[ ! -d ${d} ]] && mkdir -p "${d}"
+        cp -a /etc/resolv.conf /etc/ntp.conf /etc/yp.conf "${d}" 2>/dev/null
+}
+
+# void remove_state(char *interface)
+#
+# Removes state information regarding the interface
+remove_state() {
+        local d="${svcdir}/state/$1"
+
+        [[ -d "${d}" ]] && rm -Rf "${d}"
+}
+
+# void apply_state(char *interface)
+#
+# Apply's state information about the interface to the system
+#
+apply_state() {
+	local iface
+	if [[ -z $1 ]]; then
+		iface=$( best_interface )
+		[[ -z ${iface} ]] && return
+	else
+		iface="$1"
+	fi
+
+	local d="${svcdir}/state/${iface}"
+	[[ -d ${d} ]] && cp -aR ${d}/* /etc
+}
+
+# char* best_interface() {
+#
+# Selects the best interface to apply state information to
+# This is currently based on routing metrics
+best_interface() {
+	awk '$2=="00000000" { print $7, $1 }' /proc/net/route | sort -n | head -n 1 | cut -d' ' -f2
+}
+
+# int calculate_metric(char *interface, bool skipcheck)
+#
+# Calculates the best metric for the interface
+# The Linux kernel does not use this at the moment, but we use it so that
+# default routes remain and we can work out the "best" interface
+calculate_metric() {
+	local iface="$1" exclude='$1!="Iface" && $1!="lo" && $1!="'$1'"'
+	local skip_check={2:-false} m
+
+	if ! ${skipcheck}; then
+		# Have we already got a metric?
+		m=$( awk '$1=="'${iface}'" && $2=="00000000" { print $7 }' /proc/net/route )
+		if [[ -n ${m} ]]; then
+			echo "${m}"
+			return 0
+		fi
+	fi
+	
+	local itype=$( interface_type "${iface}" ) x i
+	
+	# If we're not a wireless device then exclude wireless from the
+	# routing table so we stay < 1000
+	if [[ -e /proc/net/wireless ]]; then
+		if ! grep -q "${iface}: " /proc/net/wireless ; then
+			local i=$( sed -n -e 's/^ *\(.*\):.*/\1/p' /proc/net/wireless )
+			for x in ${i} ; do
+				exclude="${exclude} && "'$1'"!=\"${x}\""
+			done
+		fi
+	fi
+
+	# Exclude ppp and ippp as well
+	local ix="ppp|ippp"
+	[[ ${itype} == "ppp" ]] && ix="ippp"
+	[[ ${itype} == "ippp" ]] && ix="ppp"
+	i=$( sed -n -e 's/^[ ]*\('${ix}'[0-9]*\):.*$/\1/p' /proc/net/dev )
+	for x in ${i} ; do
+		exclude="${exclude} && "'$1'"!=\"${x}\""
+	done
+
+	m=$( awk "${exclude} { print "'$7'" }" /proc/net/route | sort -rn | head -n 1 | cut -d' ' -f2 )
+	m="${m:--1}"
+	(( m ++ ))
+
+	# If we're a wireless device then add 1000 so that wired interfaces take preference
+	if [[ -e /proc/net/wireless ]]; then
+		grep -q "${iface}:" /proc/net/wireless && (( m+= 1000 ))
+	fi
+	
+	# If we're a ppp device then we add 2000 for ISDN, otherwise 3000
+	[[ ${itype} == "ippp" ]] && (( m+= 2000 ))
+	[[ ${itype} == "ppp" ]] && (( m+= 3000 ))
+
+	echo ${m}
+}
+
+# int netmask2cidr(char *netmask)
+#
+# Returns the CIDR of a given netmask
+netmask2cidr() {
+	local binary="" i bin
+
+	for i in ${1//./ } ; do
+		bin=""
+		while [[ ${i} != 0 ]]; do
+			bin=$[${i}%2]${bin}
+			(( i=i>>1 ))
+		done
+		binary="${binary}${bin}"
+	done
+	binary="${binary%%0*}"
+	echo "${#binary}"
+}
+
+# char* netmask2cidr(int cidr)
+#
+# Returns the netmask of a given CIDR
+cidr2netmask() {
+	local cidr="$1" netmask="" done=0 i sum=0 cur=128
+	local octets frac
+
+	(( octets=cidr/8 ))
+	(( frac=cidr%8 ))
+	while [[ octets -gt 0 ]]; do
+		netmask="${netmask}.255"
+		(( octets-- ))
+		(( done++ ))
+	done
+
+	if [[ ${done} -lt 4 ]]; then
+		for (( i=0; i<${frac}; i++ )); do
+			(( sum+=cur ))
+			(( cur/=2 ))
+		done
+		netmask="${netmask}.${sum}"
+		(( done++ ))
+		
+		while [[ ${done} -lt 4 ]]; do
+			netmask="${netmask}.0"
+			(( done++ ))
+		done
+	fi
+
+	echo "${netmask:1}"
+}
+
+# char* ip_network(char *ip, char *netmask)
+#
+# Returns the network of the ip address
+# ip can be 192.168.0.51/24
+# or
+# ip can be 192.168.0.51 and netmask is 255.255.255.0
+ip_network() {
+	local ip="$1" mask="$2" i network x
+
+	# If we didn't get parameter 2 then assume we have a CIDR
+	if [[ -z ${mask} ]]; then
+		mask="${ip##*/}"
+		[[ -z ${mask} || ${mask} == ${ip} ]] && return 1
+		mask=$( cidr2netmask ${mask} )
+		ip="${ip%%/*}"
+	fi
+
+	ip=( ${ip//./ } )
+	mask=( ${mask//./ } )
+
+	for (( i=0; i<4; i++ )); do
+		(( x=ip[i] & mask[i] ))
+		network="${network}${x}"
+		[[ ${i} -lt 3 ]] && network="${network}."
+	done
+
+	echo "${network}"
+}
+
+# void function_wrap(char* source, char* target)
+#
+# wraps function calls - for example function_wrap(this, that)
+# maps function names this_* to that_*
+function_wrap() {
+	local i
+	for i in $( typeset -f | grep -o ^${1}_'[^ ]*' ); do
+		eval "${2}${i#${1}}() { ${i} \"\$@\"; }"
+	done
+}
+
+#############################################################################
+#                                                                           #
+######                   NO FUNCTIONS BELOW HERE PLEASE                ######
+#                                                                           #
+#############################################################################
+
+# Load some Gentoo functions to save re-writing loads of stuff
+[[ -z ${libdir} ]] && libdir="${INITNG_PLUGIN_DIR}/scripts/net"
+source "${libdir}/gentoo-functions"
+
+RC_VERBOSE="yes"
+
+if [[ -z $2 ]]; then
+	iface="${NAME}"
+else
+	iface="$1"
+fi
+ifvar=$( bash_variable ${iface} )
+	
+auto_interface="yes"
+svcdir="/var/lib/initng"
+
+# Prefer iproute2 over ifconfig
+source "${libdir}/iproute2"
+if iproute2_installed ; then
+	function_wrap iproute2 interface
+else
+	source "${libdir}/ifconfig"
+	if ! ifconfig_installed ; then
+		eerror "no handler installed"
+		exit 1
+	fi
+	function_wrap ifconfig interface
+fi
+
+[[ -f /etc/conf.d/net ]] && source "/etc/conf.d/net"
+[[ -f /etc/conf.d/wireless ]] && source "/etc/conf.d/wireless"
+
+# Grab our configuration
+# DHCP clients will need metric, so we load it here
+if [[ ${iface} == "lo" ]]; then
+	config=( "127.0.0.1/8 brd 127.255.255.255" "${config_lo[@]}" )
+	routes_lo=( "127.0.0.0/8" "${routes_lo[@]}" )
+	metric=0
+else
+	eval config='( "${config_'${ifvar}'[@]}" )'
+	eval fallback='( "${fallback_'${ifvar}'[@]}" )'
+	eval fallback_route='( "${fallback_route_'${ifvar}'[@]}" )'
+
+	eval metric=\"\$\{metric_${iface}\}\"
+	if [[ -z ${metric} && ${auto_interface} == "yes" ]]; then
+	   	metric=$( calculate_metric ${iface} )
+	else
+		metric=0
+	fi
+fi
+
+# Override some vars
+background="no"
+IN_BACKGROUND="no"

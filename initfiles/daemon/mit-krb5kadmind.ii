@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/mit-krb5kadmind {
+	need = system/bootmisc daemon/mit-krb5kdc;
+	exec daemon = @kadmind@ -nofork;
+}

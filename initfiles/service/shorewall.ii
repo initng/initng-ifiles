@@ -1,0 +1,11 @@
+# NAME: Shorewall
+# DESCRIPTION: High-level tool for configuring Netfilter.
+# WWW: http://www.shorewall.net/
+
+service service/shorewall {
+	need = system/bootmisc virtual/net;
+	use = daemon/ulogd;
+	provide = virtual/firewall;
+	exec start = @/sbin/shorewall@ -q start;
+	exec stop = @/sbin/shorewall@ stop;
+}

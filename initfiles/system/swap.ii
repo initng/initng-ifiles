@@ -1,0 +1,9 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service system/swap {
+	need = system/initial system/mountfs/essential;
+	exec start = @/sbin/swapon@ -a;
+	exec stop = @/sbin/swapoff@ -a;
+}

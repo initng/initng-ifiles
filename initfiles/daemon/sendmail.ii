@@ -1,0 +1,26 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service daemon/sendmail/prepare {
+	need = system/bootmisc;
+	script start = {
+		if [ -x /usr/bin/make -a -f /etc/mail/Makefile ]
+		then
+			@make@ all -C /etc/mail -s >/dev/null
+		else
+			for i in virtusertable access domaintable mailertable
+			do
+				[ -f /etc/mail/${i} ] && @makemap@ hash /etc/mail/${i} </etc/mail/${i}
+			done
+		fi
+		@/usr/bin/newaliases@ >/dev/null 2>&1
+	};
+}
+
+daemon daemon/sendmail {
+	need = system/bootmisc virtual/net;
+	use = daemon/sendmail/prepare;
+	provide = virtual/mta;
+	exec daemon = @/usr/sbin/sendmail@ -q1h -bD;
+}

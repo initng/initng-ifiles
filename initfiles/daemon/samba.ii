@@ -1,0 +1,28 @@
+# NAME: samba
+# DESCRIPTION: File and print server for Windows clients
+# WWW: http://www.samba.org
+
+daemon daemon/samba/winbind {
+	need = system/bootmisc;
+	respawn;
+	exec daemon = @/usr/sbin/winbindd@ -F;
+}
+
+daemon daemon/samba/smbd {
+	need = system/bootmisc;
+	use = daemon/cupsd daemon/slapd;
+	respawn;
+	exec daemon = @/usr/sbin/smbd@ -F;
+}
+
+daemon daemon/samba/nmbd {
+	need = system/bootmisc;
+	use = daemon/cupsd daemon/slapd;
+	respawn;
+	exec daemon = @/usr/sbin/nmbd@ -F;
+}
+
+virtual daemon/samba {
+	also_stop = daemon/samba/smbd daemon/samba/nmbd;
+	need = daemon/samba/smbd daemon/samba/nmbd;
+}

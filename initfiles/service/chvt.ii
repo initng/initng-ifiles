@@ -1,0 +1,9 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service service/chvt/* {
+	need = virtual/getty/${NAME} system/bootmisc;
+	last;
+	exec start = @chvt@ ${NAME};
+}

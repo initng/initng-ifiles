@@ -1,0 +1,9 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/dcron {
+	need = system/bootmisc;
+	provide = virtual/cron;
+	exec daemon = @/usr/sbin/crond@ -n;
+}

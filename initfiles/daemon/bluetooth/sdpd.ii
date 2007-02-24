@@ -1,0 +1,7 @@
+daemon daemon/bluetooth/sdpd {
+	need = system/bootmisc daemon/bluetooth/hcid;
+	pid_of = sdpd;
+	exec daemon = @/usr/sbin/sdpd@;
+	forks;
+	respawn;
+}

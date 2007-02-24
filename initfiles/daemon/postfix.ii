@@ -1,0 +1,28 @@
+# NAME: Postfix
+# DESCRIPTION: sendmail-compatible mail transport agent
+# WWW: http://www.postfix.org/
+
+daemon daemon/postfix/pwcheck {
+	need = system/bootmisc;
+	exec daemon = @/usr/sbin/pwcheck@;
+	pid_file = /var/run/pwcheck.pid;
+	forks;
+}
+
+service daemon/postfix/newaliases {
+	need = system/bootmisc;
+	exec start = @newaliases@;
+}
+
+daemon daemon/postfix {
+#ifd fedora mandriva
+	need = daemon/postfix/newaliases;
+#endd
+	need = system/bootmisc;
+	use = daemon/postfix/pwcheck;
+	provide = virtual/mta;
+	exec daemon = @postfix@ start;
+	pid_file = /var/spool/postfix/pid/master.pid;
+	forks;
+	exec kill = @postfix@ stop;
+}

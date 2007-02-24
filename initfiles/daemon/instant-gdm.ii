@@ -1,0 +1,32 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+# To get this working, remove consolefont from system.runlevel
+# This is just a test (for now)
+# make this a plugin, make it hold all services except from what we need
+# (and what that needs) and sleep 2 seconds after starting gdm.
+# Should make it start FAST.
+# we can use /proc/bus/pci (lspci) to find out which modules we need to load.
+# fix gdm? :p, it's sloooow.
+service daemon/instant-gdm/dev {
+	need = system/bootmisc;
+	script start = {
+		if [ -e /sys/class/input/mice/dev ]
+		then
+			@mkdir@ -p /dev/input
+			@mknod@ /dev/input/mice c 13 63 >/dev/null 2>&1
+		fi
+	};
+}
+
+daemon daemon/instant-gdm {
+	# change nvidia, if you haven't nvidia.
+	need = system/bootmisc;
+	use = daemon/instant-gdm/dev service/xorgconf system/modules/mousedev system/modules/fglrx system/modules/nvidia;
+#ifd debian ubuntu
+	env_file = /etc/default/gdm;
+#endd
+	nice = -4;
+	exec daemon = @/usr/sbin/gdm@ -nodaemon;
+}

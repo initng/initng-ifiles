@@ -1,0 +1,11 @@
+# NAME: NoIP
+# DESCRIPTION: Update client for no-ip.com's dynamic IP service
+# WWW: http://www.no-ip.com
+
+daemon daemon/noip {
+	need = virtual/net system/bootmisc;
+	exec daemon = @/usr/local/bin/noip2@;
+	pid_of = noip2;
+	respawn;
+	forks;
+}

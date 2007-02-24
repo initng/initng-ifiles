@@ -1,0 +1,4 @@
+service up-fake {
+	exec start = echo Up plugin works!;
+	last;
+}

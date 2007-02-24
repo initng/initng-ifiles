@@ -1,0 +1,3 @@
+service debug/fstat-test {
+	require_file = /test;
+}

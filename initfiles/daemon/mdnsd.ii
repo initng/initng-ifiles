@@ -1,0 +1,9 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/mdnsd {
+	exec daemon = @/usr/sbin/mdnsd@;
+	pid_file = /var/run/mdnsd.pid;
+	forks;
+}

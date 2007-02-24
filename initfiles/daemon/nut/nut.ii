@@ -1,0 +1,5 @@
+virtual daemon/nut {
+	also_stop = daemon/nut/upsdrv daemon/nut/upsd daemon/nut/upsmon;
+	need = system/bootmisc daemon/nut/upsdrv daemon/nut/upsd;
+	use = daemon/nut/upsmon;
+}

@@ -1,0 +1,4 @@
+service debug/virtual {
+	daemon = @/bin/cat@;
+	provide = virtual/cat-alike;
+}

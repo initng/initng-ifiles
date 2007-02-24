@@ -1,0 +1,9 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/pbbuttonsd {
+	need = service/alsasound virtual/net/lo;
+	exec daemon = /usr/bin/pbbuttonsd;
+#	pid_file = /var/run/pbbuttonsd.pid;
+}

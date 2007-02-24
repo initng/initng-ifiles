@@ -1,0 +1,12 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service service/pppoe {
+	need = system/bootmisc system/modules system/hostname;
+	use = system/modules system/coldplug;
+	provide = virtual/net;
+	stdout = /dev/null;
+	exec start = @adsl-start:adsl-connect:pppoe-start:pppoe-connect@;
+	exec stop = @adsl-stop:pppoe-stop@;
+}

@@ -1,0 +1,4 @@
+virtual daemon/bluetooth {
+	need = system/bootmisc daemon/bluetooth/hcid daemon/bluetooth/sdpd;
+	also_stop = daemon/bluetooth/hcid daemon/bluetooth/sdpd;
+}

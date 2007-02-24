@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/chronyd {
+	need = system/bootmisc virtual/net;
+	exec daemon = /usr/sbin/chronyd -f /etc/chrony/chrony.conf;
+	pid_file = /var/run/chronyd.pid;
+	forks;
+}

@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/cardmgr {
+	need = system/bootmisc system/pcmcia;
+	exec daemon = @/sbin/cardmgr@ -s /var/run/stab;
+	pid_file = /var/run/cardmgr.pid;
+	forks;
+}

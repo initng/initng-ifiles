@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/nscd {
+	need = system/bootmisc;
+	exec daemon = @/usr/sbin/nscd@;
+	pid_file = /var/run/nscd/nscd.pid;
+	forks;
+}

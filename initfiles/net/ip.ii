@@ -1,0 +1,17 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service net/ip/* {
+	need = system/bootmisc;
+	use  = net/bridge/${NAME} net/iwconfig/${NAME};
+	provide = virtual/net virtual/net/${NAME};
+	script start = {
+		@ip@ addr add ${config_$NAME} ${NAME}
+		@ip@ link set ${NAME} up
+	};
+	script stop = {
+		@ip@ link set ${NAME} down
+		@ip@ addr del ${config_$NAME} ${NAME}
+	}
+}

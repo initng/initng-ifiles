@@ -1,0 +1,13 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service net/iwconfig/* {
+	need = bootmisc;
+	script start = {
+		essid=${essid_$NAME}
+		@iwconfig@ essid ${NAME} ${essid}
+		@iwconfig@ key ${NAME} ${key_$essid}
+		@iwconfig@ chan ${NAME} ${channel_$essid}
+	};
+}

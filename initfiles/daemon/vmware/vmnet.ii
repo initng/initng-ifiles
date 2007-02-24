@@ -1,0 +1,19 @@
+# Making this a need, rather than a use.  Shouldn't break anything, if the nodes exist, they won't be re-made
+service daemon/vmware/vmnet/prepare {
+	need = system/bootmisc system/modules/vmnet;
+	script start = {
+		for i in 0 1 2 3
+		do
+			if [ ! -e "/dev/vmnet${i}" ]
+			then
+				@mknod@ -m 600 "/dev/vmnet${i}" c 119 0
+			fi
+		done
+		exit 0
+	};
+}
+
+daemon daemon/vmware/vmnet {
+	need = system/bootmisc daemon/vmware/vmnet/prepare;
+	exec daemon = @/opt/vmware/bin/vmnet-bridge@ /dev/vmnet0 eth0;
+}

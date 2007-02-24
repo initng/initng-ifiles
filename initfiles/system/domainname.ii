@@ -1,0 +1,11 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service system/domainname {
+	need = system/initial;
+	env_file = /etc/conf.d/domainname;
+	script start = {
+		[ -n ${NISDOMAIN} ] && @/bin/domainname@ "${NISDOMAIN}"
+	};
+}

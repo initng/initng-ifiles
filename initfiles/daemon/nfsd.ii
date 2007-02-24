@@ -1,0 +1,27 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+#ifd gentoo
+service daemon/nfsd {
+	need = system/initial daemon/portmap virtual/net;
+	env RPCNFSDCOUNT = 8;
+	env_file = /etc/conf.d/nfs;
+	script start = {
+	    /sbin/rpc.lockd
+	    /usr/sbin/rpc.nfsd ${RPCNFSDCOUNT}
+	};
+	script stop = {
+	    /bin/killall -2 nfsd
+	};
+}
+#elsed
+daemon daemon/nfsd {
+	need = system/initial daemon/portmap;
+	pid_of = rpc.nfsd;
+#ifd fedora mandriva
+	env_file = /etc/sysconfig/nfs;
+#endd
+	exec daemon = @rpc.nfsd@ ${RPCNFSDARGS} ${RPCNFSDCOUNT};
+}
+#endd

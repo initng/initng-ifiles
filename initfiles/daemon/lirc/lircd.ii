@@ -1,0 +1,12 @@
+daemon daemon/lirc/lircd { 
+	need = system/bootmisc system/modules;
+	use = system/discover system/coldplug system/modules;
+#ifd gentoo
+	env_file = /etc/conf.d/lircd;
+	exec daemon = @/usr/sbin/lircd@ ${LIRCD_OPTS} -P /var/run/lircd.pid;
+#elsed
+	exec daemon = @/usr/sbin/lircd@ -d /dev/lirc/0 -P /var/run/lircd.pid;
+#endd
+	pid_file = /var/run/lircd.pid;
+	forks;
+} 

@@ -1,0 +1,51 @@
+# NAME: MySQL
+# DESCRIPTION: SQL database server
+# WWW: http://www.mysql.com/
+
+service daemon/mysql/initdb {
+	need = system/bootmisc;
+#ifd pingwinek enlisy
+	env DATA=/srv/mysql;
+#elsed
+	env DATA=/var/lib/mysql;
+#endd
+	script start = {
+#ifd enlisy
+		if [ ! -d ${DATA} ]; then
+			@mkdir@ -p ${DATA}
+			/usr/bin/mysql_install_db --datadir=${DATA} --user=mysql >/dev/null 2>&1
+			chown -R mysql.mysql ${DATA}
+		fi
+#elsed
+		if [ ! -d ${DATA}/db/mysql ]
+		then
+			if [ ! -d ${DATA} ]
+			then
+				@mkdir@ -p ${DATA}
+				chown mysql.mysql ${DATA}
+				chmod go-rwx ${DATA}
+			fi
+			su mysql -c "/usr/bin/mysql_install_db" >/dev/null 2>&1
+		fi
+		exec [ -f ${DATA}/db/mysql/db.frm ]
+#endd
+	};
+}
+
+daemon daemon/mysql {
+	need = system/bootmisc virtual/net/lo;
+	use = daemon/mysql/initdb;
+	env PIDFILE=/var/run/mysqld/mysqld.pid;
+#ifd fedora mandriva
+	exec daemon = @/usr/bin/mysqld_safe@ --pid-file=${PIDFILE} --defaults-file=/etc/my.cnf;
+#elsed
+	exec daemon = @/usr/bin/mysqld_safe@ --pid-file=${PIDFILE};
+#endd
+	pid_file = ${PIDFILE};
+	script kill = {
+		# Neccesary for mysqld to stop (we have to send the
+                # SIGKILL to mysqld itself, but initng has the PID
+		# of mysqld_safe - it has to for various reasons)
+		kill $(cat ${PIDFILE})
+	}
+}

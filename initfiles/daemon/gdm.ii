@@ -1,0 +1,21 @@
+# NAME: GDM
+# DESCRIPTION: Graphical login manager for the GNOME desktop environment
+# WWW: http://www.gnome.org/projects/gdm/
+
+daemon daemon/gdm {
+	need = system/bootmisc;
+	use = daemon/xfs service/faketty service/xorgconf;
+#ifd pingwinek
+	use = system/dbus;
+#elsed
+	use = daemon/915resolution;
+#endd
+	conflict = daemon/kdm daemon/wdm daemon/xdm daemon/entranced;
+	provide = virtual/dm;
+#ifd debian
+	env_file = /etc/default/gdm;
+	exec daemon = @gdm@ -nodaemon;
+#elsed
+	exec daemon = @/usr/sbin/gdm@ -nodaemon;
+#endd
+}

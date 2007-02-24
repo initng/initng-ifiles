@@ -1,0 +1,14 @@
+# NAME: Tor
+# DESCRIPTION: Anonymising proxy network
+# WWW: http://tor.eff.org
+
+daemon daemon/tor {
+        need = system/bootmisc virtual/net;
+#ifd debian
+        suid = debian-tor;
+        sgid = debian-tor;
+#endd
+        exec daemon = @/usr/sbin/tor@;
+        pid_of = tor;
+        respawn;
+}

@@ -1,0 +1,13 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service system/rmnologin {
+	need = system/mountfs/essential;
+	script start = {
+		if [ -f /etc/nologin.boot ]
+		then
+			@rm@ -f /etc/nologin /etc/nologin.boot >/dev/null 2>&1
+		fi
+	};
+}

@@ -1,0 +1,9 @@
+# NAME: CUPS
+# DESCRIPTION: The Common Unix Printing System
+# WWW: http://www.cups.org
+
+daemon daemon/cupsd {
+	need = system/bootmisc virtual/net/lo;
+	use = daemon/printconf daemon/hpiod daemon/hpssd;
+	exec daemon = @/usr/sbin/cupsd@ -F;
+}

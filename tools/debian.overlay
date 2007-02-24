@@ -1,0 +1,4 @@
+# Simple path overlay file for systems that build initng chroot.
+
+gdm = /usr/sbin/gdm
+

@@ -1,0 +1,7 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/splash_update {
+	exec daemon = @/sbin/splash_update@;
+}

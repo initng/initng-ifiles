@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/nifd {
+	need = system/bootmisc;
+	exec daemon = @/usr/bin/nifd@ -n;
+	pid_file = /var/run/nifd.pid;
+	forks;
+}

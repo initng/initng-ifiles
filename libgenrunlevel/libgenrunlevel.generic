@@ -1,0 +1,19 @@
+#!/bin/bash
+
+function get_runlevels
+{
+	echo system.virtual default.runlevel
+}
+
+function gen_runlevel
+{
+	if [ ${1} = system.virtual ]; then
+		add_service ${1} system/consolefont
+		copy_sysvinit_services system ${default_sysvinit_runlevel}
+	fi
+
+	local dm
+	for dm in gdm kdm xdm; do
+		check_for ${dm} && add_service daemon/${dm}
+	done
+}

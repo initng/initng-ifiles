@@ -1,0 +1,21 @@
+daemon daemon/exim/queuerunner {
+	need = system/bootmisc virtual/net daemon/exim/updateconf;
+	conflict = daemon/exim/combined;
+
+	env COMMONOPTIONS="";
+	env QUEUERUNNEROPTIONS="";
+	env QFLAGS="";
+	env SMTPLISTENEROPTIONS="";
+	env QUEUEINTERVAL=30m;
+	env QRPIDFILE=/var/run/exim4/eximqr.pid;
+
+#ifd debian 
+	env_file = /etc/defaults/exim4; 
+#elsed gentoo 
+	env_file = /etc/conf.d/exim; 
+#endd
+
+	exec daemon = @/usr/sbin/exim4@ -oP "${QRPIDFILE}" -q${QFLAGS}${QUEUEINTERVAL} ${COMMONOPTIONS} ${QUEUERUNNEROPTIONS};
+	pid_file = ${QRPIDFILE};
+	forks;
+}

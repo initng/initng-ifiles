@@ -1,0 +1,11 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/avahi-daemon {
+	need = system/bootmisc daemon/dbus virtual/net;
+	exec daemon = @/usr/sbin/avahi-daemon@ -s;
+	daemon_stops_badly;
+	#pid_file = /var/run/avahi-daemon/pid;
+	#forks;
+}

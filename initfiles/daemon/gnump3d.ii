@@ -1,0 +1,15 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service daemon/gnump3d/index {
+	need = system/bootmisc;
+	exec start = @/usr/bin/gnump3d-index@;
+}
+
+daemon daemon/gnump3d {
+	need = system/bootmisc virtual/net;
+	use = daemon/gnump3d/index;
+	respawn;
+	exec daemon = @/usr/bin/gnump3d@ --quiet;
+}

@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service service/wifi-radar {
+	need = system/bootmisc;
+	use = system/modules system/coldplug;
+	exec start = @/usr/sbin/wifi-radar@ -d;
+	stdall = /var/log/wifi-radar.log;
+}

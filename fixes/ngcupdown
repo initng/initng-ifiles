@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+case "$2" in
+up)
+	/sbin/ngc -u net/$1
+	;;
+down)
+	/sbin/ngc -d net/$1
+	;;
+esac

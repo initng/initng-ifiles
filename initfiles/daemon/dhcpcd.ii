@@ -1,0 +1,50 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/dhcpcd/* {
+	need = system/bootmisc;
+	use = system/modules system/coldplug;
+#ifd arch
+	pid_file = /etc/dhcpc/dhcpcd-${NAME}.pid;
+#elsed
+	pid_file = /var/run/dhcpcd-${NAME}.pid;
+#endd
+	forks;
+	respawn;
+	daemon_stops_badly;
+	env_file = /etc/conf.d/net;
+	script daemon = {
+		eval opts=\"\$\{dhcpcd_${NAME}\}\"
+#ifd gentoo
+		# Gentoo dhcpcd supports the -o option which stops the
+		# interface from being taken down when dhcpcd exits
+		# This is needed if something like ifplugd or wpa_supplicant
+		# is controlling dhcp on the interface
+		/sbin/dhcpcd -h 2>&1 | @grep@ -q "dkno" && opts="${opts} -o"
+#endd
+		eval d=\"\$\{dhcp_${NAME}\}\"
+		[ "${d}" = "" ] && d="${dhcp}"
+
+		for o in ${d}
+		do
+			case ${o} in
+				nodns) opts="${opts} -R" ;;
+				nontp) opts="${opts} -N" ;;
+				nonis) opts="${opts} -Y" ;;
+				nohostname) opts="${opts} -h" ;;
+			esac
+		done
+
+		# Bad things happen if we get an infinite lease,
+		# so try and make sure we don't
+		echo "${opts}" | @grep@ -w -- '-l' > /dev/null || opts="${opts} -l 86400"
+
+		h=`hostname`
+		if [ -n "${h}" -a ! "${h}" = "(none)" -a ! "${h}" = "localhost" ]
+		then
+			echo "${opts}" | @grep@ -w -- '-h' || opts="${opts} -h ${h}"
+		fi
+		exec @/sbin/dhcpcd@ ${opts} ${NAME}
+	};
+}

@@ -1,0 +1,9 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service service/athcool {
+	need = system/bootmisc;
+	exec start = @/usr/sbin/athcool@ on;
+	exec stop = @/usr/sbin/athcool@ off;
+}

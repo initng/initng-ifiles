@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/named {
+	need = system/bootmisc virtual/net;
+	exec daemon = @/usr/sbin/named@ -u named -f;
+}

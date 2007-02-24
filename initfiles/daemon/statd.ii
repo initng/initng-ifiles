@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/statd {
+	need = system/initial daemon/portmap virtual/net;
+	exec daemon = @rpc.statd@ -F;
+}

@@ -1,0 +1,11 @@
+daemon daemon/lirc/irexec {
+	env user=nobody;
+	env_file = /etc/conf.d/irexec;
+	suid = ${user};
+
+	need = daemon/lirc/lircd system/bootmisc;
+	respawn;
+	stdout = /dev/null;
+
+	exec daemon = @irexec@;
+}

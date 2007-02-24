@@ -1,0 +1,18 @@
+# NAME: Pure-FTPd
+# DESCRIPTION: Secure, production-quality and standard-conformant FTP server.
+# WWW: http://www.pureftpd.org/project/pure-ftpd
+
+daemon daemon/pure-ftpd {
+	need = system/bootmisc;
+	use = daemon/mysql;
+#ifd gentoo
+	env_file = /etc/conf.d/pure-ftpd;
+	exec daemon = @/usr/sbin/pure-ftpd@ $SERVER $MAX_CONN $MAX_CONN_IP $DISK_FULL $USE_NAT $AUTH $LOG $TIMEOUT $MISC_OTHER;
+#elsed enlisy
+	exec daemon = @/usr/sbin/pure-config.py@ /etc/pure-ftpd.conf;
+#elsed
+	exec daemon = @/usr/sbin/pure-config.pl@ /etc/pure-ftpd/pure-ftpd.conf;
+#endd
+	pid_file = /var/run/pure-ftpd.pid;
+	forks;
+}

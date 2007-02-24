@@ -1,0 +1,10 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/wpa_cli/* {
+	need = system/bootmisc;
+	use = system/modules;
+	exec daemon = @/usr/bin/wpa_cli@ -i${NAME} -p/var/run/wpa_supplicant -P/var/run/wpa_cli-${NAME}.pid -a${INITNG_PLUGIN_DIR}/scripts/net/wpa_cli.action;
+	# pid_file = /var/run/wpa_cli-${NAME}.pid;
+}

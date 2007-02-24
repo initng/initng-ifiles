@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service system/discover {
+	need = system/initial system/mountroot system/modules;
+	exec start = @discover-modprobe@ -v;
+}

@@ -1,0 +1,9 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service daemon/auditd {
+	need = system/initial system/bootmisc;
+	exec start = @/etc/init.d/auditd@ start;
+	exec stop = @/etc/init.d/auditd@ stop;
+}

@@ -1,0 +1,11 @@
+# NAME: WDM
+# DESCRIPTION: WINGs Display Manager
+# WWW: http://voins.program.ru/wdm
+
+daemon daemon/wdm {
+	need = system/bootmisc;
+	conflict = daemon/gdm daemon/kdm daemon/xdm;
+	provide = virtual/dm;
+	use = system/modules system/coldplug;
+	exec daemon = @/usr/bin/wdm@ -nodaemon;
+}

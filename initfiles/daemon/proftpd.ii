@@ -1,0 +1,11 @@
+# NAME: ProFTPD
+# DESCRIPTION: Secure and configurable FTP server.
+# WWW: http://www.proftpd.org/
+
+daemon daemon/proftpd {
+	need = system/bootmisc virtual/net;
+	exec daemon = @/usr/sbin/proftpd@;
+	pid_file = /var/run/proftpd.pid;
+	daemon_stops_badly;
+	forks;
+}

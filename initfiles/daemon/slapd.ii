@@ -1,0 +1,18 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/slapd {
+	need = system/bootmisc;
+#ifd gentoo
+	env_file = /etc/conf.d/slapd;
+	exec daemon = @/usr/lib/openldap/slapd@ -u ldap -g ldap ${OPTS};
+#elsed
+	suid = ldap;
+	sgid = ldap;
+	exec daemon = @/usr/lib/openldap/slapd@;
+#endd
+	pid_file = /var/run/openldap/slapd.pid;
+	exec kill = killall -2 slapd;
+	forks;
+}

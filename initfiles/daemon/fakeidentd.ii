@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/fakeidentd {
+	need = system/bootmisc virtual/net;
+	exec daemon = @/usr/sbin/fakeidentd@ mafteah;
+	pid_file = /var/run/fakeidentd.pid;
+	forks;
+}

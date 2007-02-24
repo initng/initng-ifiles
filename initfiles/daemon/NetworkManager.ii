@@ -1,0 +1,22 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service daemon/NetworkManager/prepare {
+	need = system/bootmisc;
+	script start = {
+		[ -d /var/lib/NetworkManager ] || @/bin/mkdir@ -p /var/lib/NetworkManager
+		chmod 755 /var/lib/NetworkManager
+		[ -d /var/run/NetworkManager ] || @/bin/mkdir@ -p /var/run/NetworkManager
+		chmod 755 /var/run/NetworkManager
+	};
+}
+
+daemon daemon/NetworkManager {
+	need = system/bootmisc daemon/dbus daemon/NetworkManager/prepare system/modules/capability daemon/hald daemon/dhcdbd;
+	provide = virtual/net;
+	env PID_FILE = /var/run/NetworkManager/NetworkManager.pid;
+	exec daemon  = @/usr/sbin/NetworkManager@ --pid-file=${PID_FILE};
+	pid_file = ${PID_FILE};
+	forks;
+}

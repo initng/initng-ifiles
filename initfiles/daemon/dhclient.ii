@@ -1,0 +1,13 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/dhclient/* {
+	need = system/bootmisc;
+	use = system/modules system/coldplug;
+	stdout = /var/log/dhclient.${NAME};
+	exec daemon = @/sbin/dhclient@ -d ${NAME};
+	#pid_file = /var/run/dhclient-${NAME}.pid;
+	forks;
+	respawn;
+}

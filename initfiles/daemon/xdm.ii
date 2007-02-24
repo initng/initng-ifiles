@@ -1,0 +1,15 @@
+# NAME: Xdm
+# DESCRIPTION: X.org graphical greeter
+# WWW: http://xorg.freedesktop.org
+
+daemon daemon/xdm {
+	need = system/bootmisc;
+	conflict = daemon/gdm daemon/kdm daemon/wdm;
+	use = system/modules system/coldplug service/faketty;
+	provide = virtual/dm;
+#ifd debian
+	exec daemon = @/usr/bin/X11/xdm@ -nodaemon;
+#elsed
+	exec daemon = @/usr/sbin/xdm:/usr/bin/xdm@ -nodaemon;
+#endd
+}

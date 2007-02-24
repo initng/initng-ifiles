@@ -1,0 +1,46 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/openvpn/* {
+	need = system/bootmisc virtual/net;
+	exec daemon = @/usr/sbin/openvpn@ --config /etc/openvpn/${NAME}/local.conf --writepid /var/run/openvpn-${NAME}.pid --cd /etc/openvpn/${NAME};
+}
+
+service daemon/openvpn/prepare {
+	need = system/bootmisc system/modules/tun;
+	script start = {
+		if [ -h /dev/net/tun -a -c /dev/misc/net/tun ]
+		then
+			echo "Detected broken /dev/net/tun symlink, fixing..."
+			@rm@ /dev/net/tun
+			@ln@ -s /dev/misc/net/tun /dev/net/tun
+		fi
+	};
+}
+
+service daemon/openvpn {
+	need = system/bootmisc system/modules/tun;
+	script start = {
+		if [ ! -d /etc/openvpn ]
+		then
+			echo "Cant find openvpn conf dir! ..."
+			exit 1
+		fi
+	
+		cd /etc/openvpn
+		for VPN in *
+		do
+			[ -e ${VPN}/local.conf ] && @/sbin/ngc@ --quiet --instant -u daemon/openvpn/${VPN}
+		done
+		exit 0
+	};
+	script stop = {
+		cd /etc/openvpn
+		for VPN in *
+		do
+			[ -e ${VPN}/local.conf ] && @/sbin/ngc@ --quiet --instant -d daemon/openvpn/${VPN}
+		done
+		exit 0
+	};
+}

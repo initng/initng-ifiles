@@ -1,0 +1,106 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+
+# Check for virtualization
+service system/initial/virtcheck {
+	critical;
+	script start = {
+		[ -e /proc/cpuinfo ] || exit 0
+
+		# is Xen?
+		[ -r /proc/xen/capabilities ] &&
+		grep -q 'control_d' /proc/xen/capabilities || {
+			echo xen > /var/initng_isvirt
+			exit 0
+		}
+
+		# is VServer or OpenVZ?
+		egrep -q '(s_context|VxID|envID):[[:space:]]*[1-9]' /proc/self/status && {
+			echo vps > /var/initng_isvirt
+			exit 0
+		}
+
+		# is UML?
+		grep -q 'UML' /proc/cpuinfo && {
+			echo uml > /var/initng_isvirt
+			exit 0
+		}
+
+		# is coLinux?
+		@grep@ -q ' cobd$' /proc/devices &&
+			echo colinux > /var/initng_isvirt
+
+		exit 0
+	};
+
+	script stop = {
+		[ -e /var/initng_isvirt ] && rm -f /var/initng_isvirt
+		exit 0
+	};
+}
+
+# This one should be ran first, and only depend on virtcheck.
+# Its purpose is to mount /proc /dev and /sys.
+service system/initial/mountvirtfs {
+	need = system/initial/virtcheck;
+	critical;
+	script start = {
+		[ -e /var/initng_isvirt ] && exit 0
+
+		# test, if all necessary directories exist.
+		if [ ! -d /proc -o ! -d /sys ] 
+		then
+			echo "The /sys or /proc is missing, can't mount it!" >&2
+			echo "Please sulogin, remount rw and create them." >&2
+			exit 1 # It can't work. Critical!
+		fi
+
+		mount -n -t proc proc /proc &
+		mount -n -t sysfs sys /sys &
+
+		wait
+		exit 0
+	};
+}
+
+service system/initial/filldev {
+	need = system/initial/mountvirtfs;
+	use = system/udev/mountdev;
+	critical; # This script can't be fail.
+	script start = {
+		[ -e /var/initng_isvirt ] && exit 0
+
+		echo "Mounting devpts at /dev/pts ..."
+		@/bin/mkdir@ -p /dev/pts && @mount@ -n -t devpts -o gid=5,mode=0620 none /dev/pts &
+
+		echo "Mounting devshm at /dev/shm ..."
+		@/bin/mkdir@ -p /dev/shm && @mount@ -n -t tmpfs none /dev/shm &
+
+		# who needs this? only user, who needs this.
+		# so i think, we should make this link, if somebody needs this.
+		[ ! -e /dev/MAKEDEV -a @/sbin/MAKEDEV@ ] &&
+			@ln@ -fs @/sbin/MAKEDEV@ /dev/MAKEDEV &
+
+		wait
+		exit 0
+	};
+}
+
+service system/initial/loglevel {
+	# Set the console loglevel to 1 for a cleaner boot
+	# the logger should anyhow dump the ring-0 buffer at start to the
+	# logs, and that with dmesg can be used to check for problems
+	exec start = @/sbin/dmesg@ -n 1;
+	# Increase the debug level a bit
+	exec stop = @/sbin/dmesg@ -n 2;
+}
+
+# This is the basic system/initial
+virtual system/initial {
+	critical;
+	need = system/initial/loglevel system/initial/mountvirtfs system/initial/filldev system/initial/virtcheck;
+	use = system/selinux/dev;
+	use = system/udev;
+}

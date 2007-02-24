@@ -1,0 +1,12 @@
+# NAME: MPD
+# DESCRIPTION: Music Player Daemon
+# WWW: http://www.musicpd.org
+
+daemon daemon/mpd {
+	need = service/alsasound system/bootmisc;
+	stdall = /dev/null;
+	exec daemon = @/usr/bin/mpd@ --no-daemon --no-create-db /etc/mpd.conf;
+	exec kill = @/usr/bin/mpd@ --kill;
+	pid_file = /var/run/mpd/mpd.pid;
+	respawn;
+}

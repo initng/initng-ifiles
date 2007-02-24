@@ -1,0 +1,5 @@
+daemon debug/failing-daemon {
+	respawn = no;
+	chdir = /this/will/not/work;
+	exec daemon = @/bin/cat@;
+}

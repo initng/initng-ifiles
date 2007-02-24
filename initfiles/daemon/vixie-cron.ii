@@ -1,0 +1,15 @@
+# NAME: vixie-cron
+# DESCRIPTION: A fully featured crond implementation
+# WWW: ftp://ftp.isc.org/isc/cron
+
+daemon daemon/vixie-cron {
+	need = system/bootmisc;
+	provide = virtual/cron;
+#ifd gentoo
+	pid_file = /var/run/cron.pid;
+#elsed
+	pid_file = /var/run/crond.pid;
+#endd
+	exec daemon = @/usr/sbin/cron@;
+	forks;
+}

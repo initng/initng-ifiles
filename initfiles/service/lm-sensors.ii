@@ -1,0 +1,50 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+service service/lm-sensors/modules {
+	need = system/bootmisc system/modules/i2c-core;
+	use = system/modules;
+#ifd fedora suse mandriva
+	env_file = /etc/sysconfig/lm_sensors;
+#elsed
+	env_file = /etc/conf.d/lm_sensors;
+#endd
+	stdall = /dev/null;
+	script start = {
+		i=0
+		while true
+		do
+			eval module=\"\${MODULE_${i}}\"
+			eval module_args=\"\${MODULE_${i}_ARGS}\"
+			[ -z "${module}" ] && break
+			if `@modprobe@ -l | @grep@ -q "${module}.ko"`
+			then
+				@/sbin/modprobe@ "${module}" ${module_args}
+			fi
+			i=$((i+1))
+		done
+	};
+	script stop = {
+		i=0
+		while true
+		do
+			eval module=\"\${MODULE_${i}}\"
+			[ -z "${module}" ] && break
+			@/sbin/rmmod@ "${module}"
+			i=$((i+1))
+		done
+	};
+}
+
+service service/lm-sensors {
+	need = system/bootmisc service/lm-sensors/modules;
+	use = system/modules;
+	stdout = /dev/null;
+	script start = {
+		# set alarm values on the sensor chip(s)
+		@/usr/bin/sensors@ -s
+		# clear out any alarms that may be present
+		@/usr/bin/sensors@
+	};
+}

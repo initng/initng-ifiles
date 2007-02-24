@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/idmapd {
+	need = system/initial daemon/portmap virtual/net;
+	exec daemon = @rpc.idmapd@ -f;
+}

@@ -1,0 +1,8 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/ulogd {
+	need = system/bootmisc;
+	exec daemon = @/usr/sbin/ulogd@;
+}

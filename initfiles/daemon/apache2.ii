@@ -1,0 +1,19 @@
+# NAME: Apache2
+# DESCRIPTION: The Apache web server, version 2
+# WWW: http://httpd.apache.org
+
+daemon daemon/apache2 {
+	need = system/bootmisc virtual/net;
+	use = daemon/sshd daemon/mysql daemon/postgres system/mountfs;
+	respawn;
+	pid_file = /var/run/apache2.pid;
+	forks;
+	env APACHE2_OPTS=-k start;
+#ifd debian
+	env_file = /etc/default/apache2;
+#elsed
+	env_file = /etc/conf.d/apache2;
+#endd
+
+	exec daemon = @/usr/sbin/apache2@ ${APACHE2_OPTS};
+}

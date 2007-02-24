@@ -1,0 +1,8 @@
+daemon daemon/bluetooth/hcid {
+	need = system/bootmisc daemon/dbus;
+	use = system/coldplug system/modules/depmod;
+	stdall = /dev/null;
+	exec daemon = @/usr/sbin/hcid@ -f /etc/bluetooth/hcid.conf;
+	pid_of = hcid;
+	respawn;
+}

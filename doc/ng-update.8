@@ -1,0 +1,52 @@
+.TH "ng-update" "8" "" "" ""
+.SH "NAME"
+ng\-update \- Initng runlevel configuration tool.
+.SH "SYNOPSIS"
+\fBng\-update\fR \fIa\fR|\fIadd\fR \fIscript1\fR [\fIscript2\fR \fI...\fR] [\fIrunlevel1\fR] [\fIrunlevel2 ...\fR]
+.br 
+\fBng\-update\fR \fId\fR|\fIdel\fR|\fIdelete\fR \fIscript1\fR [\fIscript2 ...\fR] [\fIrunlevel1\fR] [\fIrunlevel2 ...\fR]
+.br 
+\fBng\-update\fR \fIs\fR|\fIshow\fR|\fIview\fR [\fIscript\fR] [\fIrunlevel\fR]
+.SH "DESCRIPTION"
+ng\-update allows you to control/show which services are started by initng. Yo can add and delete services to/from different runlevels.
+To find out which services are available take a look at /etc/initng/[daemon|net|system].
+.SH "OPTIONS"
+.TP 
+\fBa, add\fR
+Add one or more scripts to one or more runlevels. If runlevel is left blank the script will be added to every runlevel.
+.TP 
+\fBd, del\fR
+Delete one or more scripts from one or more runlevels. If runlevel is left blank the script will be deleted from every runlevel.
+.TP 
+\fBs, show, view\fR
+Shows the scripts started in the passed runlevel(s).
+.TP 
+\fBscript\fR
+A script found in /etc/initng/[daemon|net|system] which should be added/removed.
+.br 
+The form is [daemon|net|system]/script_without_i. Take a look in the examples section.
+.TP 
+\fBrunlevel\fR
+The runlevel the script(s) should be added to/deleted from. Normally this should be \fI"default"\fR, some times \fI"system"\fR.
+.br 
+Take a look at \fI/etc/initng/*.runlevel\fR
+.SH "EXAMPLES"
+Use \fBng\-update add system/alsasound default\fR to add \fIalsasound\fR to the runlevel default.
+.br 
+Use \fBng\-update del system/alsasound\fR to remove \fIalsasound\fR from every runlevel.
+.br 
+Use \fBng\-update del system/alsasound default\fR to remove alsasound from the runlevel default.
+.br 
+Use \fBng\-update show\fR to show \fIall\fR available services and their runlevel (if existing).
+.br 
+.SH "SEE ALSO"
+.BR initng(8)
+.BR ngc(8),
+.BR ngdc(8),
+.BR gen_system_runlevel(8),
+.BR install_service(8),
+.BR system_off(8).
+.SH "AUTHOR"
+initng was written by  Jimmy Wennlund <jimmy.wennlund@gmail.com> and can be found at http://www.initng.org/.
+.PP 
+This manual page was written by Armin Berres <a.berres@onlinehome.de>.

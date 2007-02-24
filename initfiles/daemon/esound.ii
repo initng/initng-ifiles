@@ -1,0 +1,8 @@
+# NAME: ESounD
+# DESCRIPTION: The Enlightened Sound Daemon
+# WWW: http://www.tux.org/~ricdude/EsounD.html
+
+daemon daemon/esound {
+	need = system/bootmisc service/alsasound;
+	exec daemon = @/usr/bin/esd@ -nobeeps -as 2 -tcp -public;
+}

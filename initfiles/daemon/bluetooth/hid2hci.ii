@@ -1,0 +1,5 @@
+service daemon/bluetooth/hid2hci {
+	need = system/bootmisc;
+	exec start = @/usr/sbin/hid2hci@ -0;
+	exec stop = @/usr/sbin/hid2hci@ -1;
+}

@@ -1,0 +1,22 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service service/guarddog {
+	need = system/initial;
+	provide = virtual/firewall;
+	script start = /etc/rc.firewall;
+	script stop = {
+		if [ ! -x @/sbin/iptables:/sbin/ipchains@ ]
+		then
+			echo "Cannot find @/sbin/ipchains@ or @/sbin/iptables@"
+			exit 1
+		fi
+		@/sbin/iptables:/sbin/ipchains@ -P OUTPUT ACCEPT
+		@/sbin/iptables:/sbin/ipchains@ -P INPUT ACCEPT
+		@/sbin/iptables:/sbin/ipchains@ -P FORWARD ACCEPT
+		@/sbin/iptables:/sbin/ipchains@ -F
+		@/sbin/iptables:/sbin/ipchains@ -X
+		exit 0
+	};
+}

@@ -1,0 +1,8 @@
+daemon daemon/nut/upsmon {
+	need = system/bootmisc daemon/nut/upsd daemon/nut/upsdrv;
+	exec daemon = @/usr/sbin/upsmon@;
+	exec kill = @/usr/sbin/upsmon@ -c stop;
+	forks;
+	respawn;
+	pid_file = /var/run/upsmon.pid;
+}

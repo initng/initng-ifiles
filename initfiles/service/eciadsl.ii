@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+service service/eciadsl {
+	need = system/bootmisc system/usb;
+	provide = virtual/net;
+	exec start = @eciadsl-start@;
+	exec stop = @eciadsl-stop@;
+}

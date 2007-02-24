@@ -1,0 +1,21 @@
+#!/bin/bash
+if [ -z "$1" -o -z "$2" ]; then
+        echo "Insufficient parameters" > /dev/stderr
+        exit 1
+fi
+
+INTERFACE="$1"
+ACTION="$2"
+
+case ${ACTION} in
+        CONNECTED)
+                ngc -u net/${INTERFACE}
+                ;;
+        DISCONNECTED)
+                ngc -d net/${INTERFACE}
+                ;;
+        *)
+                echo "Unknown action ${ACTION}" > /dev/stderr
+                exit 1
+                ;;
+esac

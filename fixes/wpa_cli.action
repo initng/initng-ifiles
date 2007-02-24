@@ -1,0 +1,56 @@
+#!/bin/sh
+# Copyright 1999-2005 Gentoo Foundation
+# Written by Roy Marples <uberlord@gentoo.org>
+# Distributed under the terms of the GNU General Public License v2
+# Alternatively, this file may be distributed under the terms of the BSD License
+# $Header: /var/cvsroot/gentoo-x86/net-wireless/wpa_supplicant/files/wpa_supplicant-0.4.0-wpa_cli.action,v 1.1 2005/04/27 10:02:48 brix Exp $
+
+if [[ -z $1 || -z $2 ]]; then
+	echo "Insufficient parameters" >&2
+	exit 1
+fi
+
+INTERFACE="$1"
+ACTION="$2"
+
+# Note, the below action must NOT mark the interface down via ifconfig, ip or
+# similar. Addresses can be removed, changed and daemons can be stopped, but
+# the interface must remain up for wpa_supplicant to work.
+
+init=$( < /proc/1/cmdline )
+
+if [[ ${init} == "/sbin/initng" ]]; then
+	EXEC="/sbin/ngc"
+elif [[ -f /etc/gentoo-release ]]; then
+	EXEC="/etc/init.d/net.${INTERFACE} --quiet"
+else
+	echo "I don't know what to do with this distro!" > /dev/stderr
+	exit 1
+fi
+
+case ${ACTION} in
+	CONNECTED)
+		if [[ ${init} == "/sbin/initng" ]]; then
+			EXEC="${EXEC} -u net/${INTERFACE}"
+		else
+			EXEC="${EXEC} start"
+		fi
+		;;
+	DISCONNECTED)
+		if [[ ${init} == "/sbin/initng" ]]; then
+			EXEC="${EXEC} -d net/${INTERFACE}"
+		else
+			EXEC="${EXEC} stop"
+		fi
+		;;
+	*)
+		echo "Unknown action ${ACTION}" >&2
+		exit 1
+		;;
+esac
+
+# ${EXEC} can use ${IN_BACKGROUND} so that it knows that the user isn't
+# stopping the interface and a background process - like wpa_cli - is.
+export IN_BACKGROUND=true
+
+${EXEC}

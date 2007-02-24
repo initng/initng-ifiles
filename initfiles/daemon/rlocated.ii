@@ -1,0 +1,11 @@
+# NAME: rlocate
+# DESCRIPTION: Replacement for slocate that ensures up to date data
+# WWW: http://rlocate.sourceforge.net/
+
+daemon daemon/rlocated {
+        need = system/bootmisc system/modules/rlocate;
+        exec daemon = @/usr/sbin/rlocated@;
+        pid_file = /var/run/rlocated.pid;
+        forks;
+        daemon_stops_badly;
+} 

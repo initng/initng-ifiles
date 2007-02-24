@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/dovecot {
+	need = system/bootmisc virtual/net;
+	exec daemon = @/usr/sbin/dovecot@;
+	pid_file = /var/run/dovecot/master.pid;
+	forks;
+}

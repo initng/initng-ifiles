@@ -46,8 +46,8 @@ daemon service/readahead/watcher {
 	script daemon = {
 
 	    # If /usr or /var is mounted on another filesystem, make sure they will also be checked
-	    mountpoint -q /usr && @ngc@ --quiet --instant -u service/readahead/watcher-desktop
-	    mountpoint -q /var && @ngc@ --quiet --instant -u service/readahead/watcher-desktop
+	    mountpoint -q /usr && @/sbin/ngc@ --quiet --instant -u service/readahead/watcher-desktop
+	    mountpoint -q /var && @/sbin/ngc@ --quiet --instant -u service/readahead/watcher-desktop
 
 	    # Okay, launch watcher.
 	    exec @/usr/sbin/readahead-watch@ -o /etc/readahead/boot;
@@ -85,7 +85,7 @@ service service/readahead {
 			else
 			# if the watcher exist, generate /etc/readahead/boot
 			echo "Starting service/readahead/watcher, to collect boot record data "
-			@ngc@ --instant --quiet -u service/readahead/watcher
+			@/sbin/ngc@ --instant --quiet -u service/readahead/watcher
 			# Sleep 4 seconds, so readahead-watcher really stars, and got all.
 			echo "Sleep 4"
 			sleep 1

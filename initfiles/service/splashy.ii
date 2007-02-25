@@ -13,7 +13,7 @@ service service/splashy {
 		[ -x @/sbin/splashy@ ] || exit 0
 		. /etc/init.d/splashy-functions.sh
 		@start-stop-daemon@ --start --quiet --pidfile ${spl_pidfile} --exec @/sbin/splashy@ -- boot 2>/dev/null
-		exec @ngc@ -S "splashy,boot"
+		exec @/sbin/ngc@ -S "splashy,boot"
 	};
 
 # the stop script is called on shutdown
@@ -22,7 +22,7 @@ service service/splashy {
 		[ -x @/sbin/splashy@ ] || exit 0
 		. /etc/init.d/splashy-functions.sh
 		@start-stop-daemon@ --start --quiet --pidfile ${spl_pidfile} --exec ${DAEMON} -- boot 2> /dev/null
-		exec @ngc@ -S "splashy,shutdown"
+		exec @/sbin/ngc@ -S "splashy,shutdown"
 	};
 }
 

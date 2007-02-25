@@ -9,7 +9,7 @@ service service/alsasound/cards {
 		# List of drivers for each card.
 		for mod in `@/sbin/modprobe@ -c | @awk@ '$1 == "alias" && $2 ~ /^snd-card-[[:digit:]]$/ { print $2 } {}'`
 		do
-			@ngc@ --quiet -u system/modules/${mod} &
+			@/sbin/ngc@ --quiet -u system/modules/${mod} &
 		done
 		wait
 
@@ -20,7 +20,7 @@ service service/alsasound/cards {
 		echo "Could not detect custom ALSA settings.  Loading all detected alsa drivers."
 		for mod in `@/sbin/modprobe@ -c | @awk@ '$2~ /^pci:/ && $3~ /^snd.*/ { print $3 }' | sort -u`
 		do
-			@ngc@ --quiet -u system/modules/${mod} &
+			@/sbin/ngc@ --quiet -u system/modules/${mod} &
 		done
 		wait
 	};
@@ -32,7 +32,7 @@ service service/alsasound/oss {
 	script start = {
 		for mod in `@/sbin/modprobe@ -l | @grep@ "snd.*oss" | @sed@ -e "s:\/.*\/::" -e "s:\..*::"`
 		do
-			@ngc@ --quiet -u system/modules/${mod} &
+			@/sbin/ngc@ --quiet -u system/modules/${mod} &
 		done
 		wait
 	};
@@ -46,11 +46,11 @@ service service/alsasound/seq {
 		# timidity even if we do not use a real sequencer.
 		for mod in `@/sbin/modprobe@ -l | @sed@ -ne '{ s|.*/\([^/]*\)\.ko$|\1|; /^snd[_-]seq/ { /oss/ !p } }'`
 		do
-			@ngc@ --quiet -u system/modules/${mod} &
+			@/sbin/ngc@ --quiet -u system/modules/${mod} &
 		done
 		for mod in `@awk@ -F, '$2~ /^empty$/ { print $1 }' /proc/asound/seq/drivers`
 		do
-			@ngc@ --quiet -u system/modules/${mod} &
+			@/sbin/ngc@ --quiet -u system/modules/${mod} &
 		done
 		wait
 	};
@@ -64,7 +64,7 @@ service service/alsasound/ioctl32 {
 		# compatibility
 		for mod in `@/sbin/modprobe@ -l | @sed@ -ne '{ s|.*/\([^/]*\)\.ko$|\1|; /^snd[_-]ioctl32/ p}'`
 		do
-			@ngc@ --quiet -u system/modules/${mod} &
+			@/sbin/ngc@ --quiet -u system/modules/${mod} &
 		done
 		wait
 	};

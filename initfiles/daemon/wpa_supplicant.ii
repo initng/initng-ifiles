@@ -18,7 +18,7 @@ daemon daemon/wpa_supplicant/* {
 
 		if [ -f /sbin/wpa_cli.action ]
 		then
-				@ngc@ --quiet --instant -u daemon/wpa_cli/${iface}
+				@/sbin/ngc@ --quiet --instant -u daemon/wpa_cli/${iface}
 				exit 0
 		fi
 
@@ -29,7 +29,7 @@ daemon daemon/wpa_supplicant/* {
 				exit 1
 		fi
 
-		@ngc@ --quiet --instant -u net/${iface}
+		@/sbin/ngc@ --quiet --instant -u net/${iface}
 	};
 	script kill = {
 		@pkill@ -f "/sbin/wpa_supplicant .* -i${NAME} "

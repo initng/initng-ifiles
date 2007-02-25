@@ -114,7 +114,7 @@ service system/mountroot/check {
 				error "The system will be restarted in 5 seconds."
 				#sleep 5
 				echo "Will now restart"
-				@ngc@ -6
+				@/sbin/ngc@ -6
 			fi
 		fi
 		exit 0

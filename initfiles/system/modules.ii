@@ -7,7 +7,7 @@ service system/modules/depmod {
 	script start = {
 		# Should not fail if kernel do not have module
 		# support compiled in ...
-		[ -e /var/initng_isvirt -o ! -f /proc/modules ] && exit 0
+		[ -e /dev/initng/isvirt -o ! -f /proc/modules ] && exit 0
 
 		# Here we should fail, as a modular kernel do need
 		# depmod command ...
@@ -59,12 +59,12 @@ service system/modules/dm-mod {
 	need = system/initial;
 	stdall = /dev/null;
 	script start = {
-		[ -e /var/initng_isvirt ] ||
+		[ -e /dev/initng/isvirt ] ||
 			@/sbin/modprobe@ -q dm-mod
 		exit 0
 	};
 	script stop = {
-		[ -e /var/initng_isvirt ] ||
+		[ -e /dev/initng/isvirt ] ||
 			@/sbin/modprobe@ -q -r dm-mod
 		exit 0
 	};
@@ -75,12 +75,12 @@ service system/modules/* {
 	use = system/modules/depmod;
 	stdall = /dev/null;
 	script start = {
-		[ -e /var/initng_isvirt ] ||
+		[ -e /dev/initng/isvirt ] ||
 			@/sbin/modprobe@ -q ${NAME}
 		exit 0
 	};
 	script stop = {
-		[ -e /var/initng_isvirt ] ||
+		[ -e /dev/initng/isvirt ] ||
 			@/sbin/modprobe@ -q -r ${NAME}
 		exit 0
 	};
@@ -90,7 +90,7 @@ service system/modules {
 	need = system/initial system/mountroot system/modules/loop;
 	use = system/modules/depmod;
 	script start = {
-		[ -e /var/initng_isvirt ] && exit 0
+		[ -e /dev/initng/isvirt ] && exit 0
 
 		load_modules() {
 			[ -r "${1}" ] || return 1

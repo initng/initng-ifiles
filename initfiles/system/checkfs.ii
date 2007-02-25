@@ -13,7 +13,7 @@ service system/checkfs {
 #endd
 	never_kill;
 	script start = {
-		[ -e /var/initng_isvirt ] && exit 0
+		[ -e /dev/initng/isvirt ] && exit 0
 
 #ifd debian
 		handle_failed_fsck() {

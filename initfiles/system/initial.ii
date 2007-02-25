@@ -12,31 +12,31 @@ service system/initial/virtcheck {
 		# is Xen?
 		[ -r /proc/xen/capabilities ] &&
 		grep -q 'control_d' /proc/xen/capabilities || {
-			echo xen > /var/initng_isvirt
+			echo xen > /dev/initng/isvirt
 			exit 0
 		}
 
 		# is VServer or OpenVZ?
 		egrep -q '(s_context|VxID|envID):[[:space:]]*[1-9]' /proc/self/status && {
-			echo vps > /var/initng_isvirt
+			echo vps > /dev/initng/isvirt
 			exit 0
 		}
 
 		# is UML?
 		grep -q 'UML' /proc/cpuinfo && {
-			echo uml > /var/initng_isvirt
+			echo uml > /dev/initng/isvirt
 			exit 0
 		}
 
 		# is coLinux?
 		@grep@ -q ' cobd$' /proc/devices &&
-			echo colinux > /var/initng_isvirt
+			echo colinux > /dev/initng/isvirt
 
 		exit 0
 	};
 
 	script stop = {
-		[ -e /var/initng_isvirt ] && rm -f /var/initng_isvirt
+		[ -e /dev/initng/isvirt ] && rm -f /dev/initng/isvirt
 		exit 0
 	};
 }
@@ -47,7 +47,7 @@ service system/initial/mountvirtfs {
 	need = system/initial/virtcheck;
 	critical;
 	script start = {
-		[ -e /var/initng_isvirt ] && exit 0
+		[ -e /dev/initng/isvirt ] && exit 0
 
 		# test, if all necessary directories exist.
 		if [ ! -d /proc -o ! -d /sys ] 
@@ -70,7 +70,7 @@ service system/initial/filldev {
 	use = system/udev/mountdev;
 	critical; # This script can't be fail.
 	script start = {
-		[ -e /var/initng_isvirt ] && exit 0
+		[ -e /dev/initng/isvirt ] && exit 0
 
 		echo "Mounting devpts at /dev/pts ..."
 		@/bin/mkdir@ -p /dev/pts && @mount@ -n -t devpts -o gid=5,mode=0620 none /dev/pts &

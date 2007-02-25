@@ -1,0 +1,8 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+  
+daemon service/yum-updatesd {
+	need = system/initial virtual/net;
+	exec daemon = @/usr/sbin/yum-updatesd@ -f;
+}

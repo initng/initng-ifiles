@@ -31,16 +31,18 @@ service daemon/openvpn {
 		cd /etc/openvpn
 		for VPN in *
 		do
-			[ -e ${VPN}/local.conf ] && @/sbin/ngc@ --quiet --instant -u daemon/openvpn/${VPN}
+			[ -e ${VPN}/local.conf ] && @/sbin/ngc@ --quiet -u daemon/openvpn/${VPN} &
 		done
+		wait
 		exit 0
 	};
 	script stop = {
 		cd /etc/openvpn
 		for VPN in *
 		do
-			[ -e ${VPN}/local.conf ] && @/sbin/ngc@ --quiet --instant -d daemon/openvpn/${VPN}
+			[ -e ${VPN}/local.conf ] && @/sbin/ngc@ --quiet -d daemon/openvpn/${VPN} &
 		done
+		wait
 		exit 0
 	};
 }

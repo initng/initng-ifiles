@@ -50,14 +50,16 @@ service daemon/ifplugd {
 #ifd gentoo
 				@echo@ ${OMIT_INTERFACES} | @/bin/grep@ -qw ${IF} || \
 #endd
-				@/sbin/ngc@ --quiet --instant -u daemon/ifplugd/${IF}
+				@/sbin/ngc@ --quiet -u daemon/ifplugd/${IF} &
 		done
+		wait
 	};
 
 	script stop = {
 		for DAEMON in `@/sbin/ngc@ -s | @awk@ '/daemon/ifplugd/\w+/ { print $2 }'`
 		do
-			@/sbin/ngc@ --quiet --instant -d ${DAEMON}
+			@/sbin/ngc@ --quiet -d ${DAEMON} &
 		done
+		wait
 	};
 }

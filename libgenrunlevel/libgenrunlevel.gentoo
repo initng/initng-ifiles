@@ -11,7 +11,7 @@ function copy_gentoo_services
 function get_runlevels
 {
 	echo $({
-		ls --color=none /etc/runlevels | sed -e 's/$/.runlevel/'
+		ls --color=none /etc/runlevels | sed -e 's@^@runlevel/@; s/$/.runlevel/'
 		echo system.virtual
 	} | grep -v boot.runlevel | sort -u)
 }

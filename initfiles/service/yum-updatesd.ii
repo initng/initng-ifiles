@@ -3,6 +3,6 @@
 # WWW:
   
 daemon service/yum-updatesd {
-	need = system/initial virtual/net;
+	need = system/initial virtual/net daemon/dbus;
 	exec daemon = @/usr/sbin/yum-updatesd@ -f;
 }

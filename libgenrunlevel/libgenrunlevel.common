@@ -30,9 +30,9 @@ function gen_runlevel_common
 		if find_exe agetty; then
 			add_service ${1} daemon/agetty
 		elif find_exe mingetty; then
-			add_service ${1} daemon/getty
-		elif find_exe getty; then
 			add_service ${1} daemon/mingetty
+		elif find_exe getty; then
+			add_service ${1} daemon/getty
 		else
 			echo "Failed to find getty/agetty/mingetty, you must" \
 			" set that manually in ${CONFDIR}/${1}" >&2
@@ -42,7 +42,7 @@ function gen_runlevel_common
 			add_service ${1} service/iptables
 		fi
 	else
-		add_service ${1} system
+		add_service ${1} runlevel/system
 
 		# sshd
 		check_for ssh && add_service ${1} daemon/sshd
@@ -81,7 +81,7 @@ function gen_runlevel_common
 
 		# Speed freq.
 		[ -d /sys/devices/system/cpu/cpu0/cpufreq ] &&
-			add_service ${1} system/speedstep
+			add_service ${1} service/speedstep
 
 		# Laptop Mode (Less hardrive on battery)
 		if find_exe laptop-mode || find_exe laptop_mode; then

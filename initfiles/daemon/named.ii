@@ -4,5 +4,14 @@
 
 daemon daemon/named {
 	need = system/bootmisc virtual/net;
-	exec daemon = @/usr/sbin/named@ -u named -f;
+	suid = named;
+
+	env OPTIONS="";
+	env CPU=1;
+	env KEY=/etc/bind/rndc.key;
+	env PIDFILE=/var/run/named/named.pid;
+	env_file = /etc/conf.d/named;
+	
+	exec daemon = @named@ -n ${CPU} ${OPTIONS} -u named;
+	pid_file = ${PIDFILE};
 }

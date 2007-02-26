@@ -5,6 +5,7 @@
 daemon daemon/distccd {
 	need = system/bootmisc virtual/net;
 	suid = distcc;
+
 #ifd gentoo
 	env DISTCCD_PIDFILE=/var/run/distccd/distccd.pid;
 	env DISTCCD_NICE=10;
@@ -16,12 +17,16 @@ daemon daemon/distccd {
 	env LISTEN=0.0.0.0;
 	env NICE=10;
 #endd
+
 	env_file = /etc/conf.d/distccd;
+
 #ifd gentoo
 	exec daemon = /usr/bin/distccd -N ${DISTCCD_NICE} --pid-file ${DISTCCD_PIDFILE} ${DISTCCD_OPTS};
+	pid_file = ${DISTCCD_PIDFILE};
 #elsed
 	exec daemon = @/usr/bin/distccd@ -N ${NICE} --pid-file ${PIDFILE} --port ${PORT} --allow ${ALLOW} --listen ${LISTEN};
-#endd
 	pid_file = ${PIDFILE};
+#endd
+
 	forks;
 }

@@ -19,10 +19,10 @@ set -e
 
 case "$1" in
       #Generate runlevels
-      /sbin/genrunlevel --migrate || /sbin/genrunlevel -all
+      /sbin/genrunlevel --migrate || /sbin/genrunlevel --all
       
       #ng-update is broken - fix the runlevel if "system" has been removed
-      grep -q ^system$ /etc/initng/default.runlevel || echo system >> /etc/initng/default.runlevel
+      grep -q ^runlevel/system$ /etc/initng/default.runlevel || echo runlevel/system >> /etc/initng/default.runlevel
        
       #Not needed anymore
       ng-update d system/makedev >/dev/null 2>&1 || true

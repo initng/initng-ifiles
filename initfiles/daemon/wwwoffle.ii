@@ -15,6 +15,7 @@ daemon daemon/wwwoffle {
 service daemon/wwwoffle/online {
 	need = daemon/wwwoffle virtual/net;
 	env CONFIG=/etc/wwwoffle/wwwoffle.conf;
+	last;
 
 	exec start = @wwwoffle@ -online -c ${CONFIG};
 	exec stop = @wwwoffle@ -offline -c ${CONFIG};

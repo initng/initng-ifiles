@@ -1,0 +1,14 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/apcupsd {
+	need = system/bootmisc;
+	pid_file = /var/run/apcupsd.pid;
+	forks;
+	script daemon = {
+       		rm -f /etc/apcupsd/powerfail
+		rm -f /etc/nologin
+		exec /usr/sbin/apcupsd -f /etc/apcupsd/apcupsd.conf
+	}
+}

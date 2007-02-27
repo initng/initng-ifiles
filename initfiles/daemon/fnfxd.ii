@@ -1,0 +1,12 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/fnfxd {
+	need = system/bootmisc;
+	use = daemon/acpid;
+	pid_file = /var/run/fnfxd.pid;
+	forks;
+
+	exec daemon = @fnfxd@;
+}

@@ -99,7 +99,6 @@ service system/modules {
 				{
 					echo "Loading module \"${MODULE}\" ..."
 					@/sbin/modprobe@ -q ${MODULE} ${MODARGS}
-					@/sbin/ngc@ --quiet -u system/modules/${MODULE}
 				} &
 			done
 		}

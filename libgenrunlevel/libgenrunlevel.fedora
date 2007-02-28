@@ -7,9 +7,9 @@ function get_runlevels
 
 function gen_runlevel
 {
-	[ ${1} == system.virtual ] && return 0
+	[ "${1}" == "runlevel/system.virtual" ] && return 0
 
-	add_service ${1} daemon/dcron daemon/hald daemon/klogd daemon/portmap
+	add_service "${1}" daemon/dcron daemon/hald daemon/klogd daemon/portmap
 
 	# Check network interfaces
 	for i in $(ls /etc/sysconfig/network-scripts/ifcfg* | \
@@ -18,7 +18,7 @@ function gen_runlevel
 	do
 		if grep -q "ONBOOT=yes" "${i}"; then
 			i=$(basename "${i}")
-			add_service ${1} net/${i#ifcfg-}
+			add_service "${1}" "net/${i#ifcfg-}"
 		fi
 	done
 
@@ -29,7 +29,7 @@ function gen_runlevel
 	    [ -r "${selinuxfs}/enforce" ] &&
 	    [ "`cat /proc/self/attr/current`" != 'kernel' ] &&
 	    [ "`cat ${selinuxfs}/enforce`" -eq 1 ] ; then
-	    add_service ${1} system/selinux/dev system/selinux/relabel
+	    add_service "${1}" system/selinux/dev system/selinux/relabel
 	fi
 
 	# Below is because dm isn't started as SysVinit service in fedora :-/
@@ -45,6 +45,6 @@ function gen_runlevel
 				preferred="${DISPLAYMANAGER}"
 			fi
 		fi
-		add_service ${1} daemon/${preferred}
+		add_service "${1}" "daemon/${preferred}"
 	fi
 }

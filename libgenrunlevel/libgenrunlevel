@@ -3,17 +3,21 @@
 function write_runlevel
 {
 	local service
-	local services=`eval echo \$\{rl_${1%.*}\}`
-	{
-		for service in ${services}; do
-			echo ${service}
-		done
-	} | sort -u
+	local rl=${1%.*}
+	rl=rl_${rl//\//_}
+
+	local services=`eval echo \$\{${rl}\}`
+
+	for service in ${services}; do
+		echo ${service}
+	done | sort -u
 }
 
 function add_service
 {
-	local rl=rl_${1%.*}
+	local rl=${1%.*}
+	rl=rl_${rl//\//_}
+
 	shift
 
 	while [ ${#} -gt 0 ]; do
@@ -24,13 +28,19 @@ function add_service
 
 function add_runlevel
 {
+	local rl=${1%.*}
+	rl=rl_${rl//\//_}
+
 	runlevels=${runlevels}" ${1}"
-	eval rl_${1%.*}=
+	eval ${rl}=
 }
 
 function in_runlevel
 {
-	eval echo \$\{rl_${1%.*}\} | grep -q ${2} && return 0
+	local rl=${1%.*}
+	rl=rl_${rl//\//_}
+
+	eval echo \$\{${rl}\} | grep -q ${2} && return 0
 	return 1
 }
 

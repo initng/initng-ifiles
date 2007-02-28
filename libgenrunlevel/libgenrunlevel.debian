@@ -7,21 +7,21 @@ function get_runlevels
 
 function gen_runlevel
 {
-	if [ ${1} = system.virtual ]; then
-		add_service ${1} system/console-screen
+	if [ "${1}" = "runlevel/system.virtual" ]; then
+		add_service "${1}" system/console-screen
 
 		[ -x /etc/init.d/ifupdown ] &&
-			add_service ${1} system/ifupdown-debian
+			add_service "${1}" system/ifupdown-debian
 
 		copy_sysvinit_services system ${default_sysvinit_runlevel}
 	else
 		local dm=`sed -ne 's:^/usr/bin/::p' /etc/X11/default-display-manager`
 		case "${dm}" in
 			gdm|kdm|xdm)
-				add_service ${1} daemon/${dm}
+				add_service "${1}" "daemon/${dm}"
 				;;
 		esac
 
-		add_service ${1} net/all
+		add_service "${1}" net/all
 	fi
 }

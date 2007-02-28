@@ -84,7 +84,7 @@ while [ ${#} -gt 0 ]; do
 done
 
 [ "${CONFDIR}" ] || CONFDIR="${DESTDIR}/etc/initng"
-mkdir -p "${CONFDIR}"
+mkdir -p "${CONFDIR}/runlevel"
 
 if [ -n "${migrate}" ]; then
 	RUNLEVELDIR="${CONFDIR}/runlevel"
@@ -127,7 +127,7 @@ for l; do
 done
 
 for rl in ${runlevels}; do
-	write_runlevel ${rl} > "${CONFDIR}/runlevel/${rl}"
+	write_runlevel ${rl} > "${CONFDIR}/${rl}"
 done
 
 echo "Done generating files."

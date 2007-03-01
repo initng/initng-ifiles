@@ -3,7 +3,8 @@
 # WWW:
 
 service system/keymaps {
-	need = system/bootmisc system/sysctl;
+	need = system/bootmisc;
+	use = system/sysctl;
 
 	env ttydev=/dev/tty;
 #ifd debian linspire

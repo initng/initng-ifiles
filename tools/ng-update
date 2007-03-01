@@ -22,18 +22,17 @@ export script_dirs="$(find "${confdir}" -type d)"
 
 # TODO: ${confdir} includes a special char for sed. very dangerous!
 # but /etc/initng isn't dangerous.
-export all_levels="`find \"${confdir}\" -name \*.runlevel -or -name \*.virtual | sed -e 's#'${confdir}'/\(.*\)\.[^\.]*$#\1#'`"
+export all_levels="`ls \"${confdir}/runlevel\" | sed -e 's#\.[^\.]*$##'`"
 
 alias error='echo -e ${RED}Error:${NORMAL}'
 alias warning='echo -e ${YELLOW}Warning:${NORMAL}'
 alias success='echo -e ${GREEN}Success:${NORMAL}'
 
 rl_file() {
-	local rl="${confdir}/${1}"
+	local rl="${confdir}/runlevel/${1}"
 
 	# if virtual exists and no runlevel, because runlevel has a higher prio.
-	if [ -e "${rl}.virtual" -a ! -e "${rl}.runlevel" ]
-	then
+	if [ -e "${rl}.virtual" -a ! -e "${rl}.runlevel" ]; then
 		echo "${rl}.virtual"
 	else
 		echo "${rl}.runlevel"
@@ -65,36 +64,29 @@ EOF
 
 add() {
 	shift
-	for q in "${@}"
-	do
-		if check_script "${q}"
-		then
+	for q in "${@}"; do
+		if check_script "${q}"; then
 			myscripts="${myscripts} ${myscript}"
-		elif check_level "${q}"
-		then
+		elif check_level "${q}"; then
 			mylevels="${mylevels} ${q}"
 		else
 			warning "\"${q}\" isn't a script or a runlevel, it's being removed from list"
 		fi
 	done
 
-	if [ -z "$(echo ${myscripts} | tr -d " ")" ]
-	then
+	if [ -z "$(echo ${myscripts} | tr -d " ")" ]; then
 		error "you didn't specify any script"
 		exit 1
 	fi
 	[ -z "${mylevels}" ] && mylevels="${DEFAULT}"
 
-	for h in ${myscripts}
-	do
+	for h in ${myscripts}; do
 		# Print some info when ng-update add if any in file.
 		display_itype_msg "${ifile}"
 
-		for i in ${mylevels}
-		do
+		for i in ${mylevels}; do
 			local rlfile=$(rl_file "${i}")
-			if ! grep -q -e "${h}\$" "${rlfile}"
-			then
+			if ! grep -q -e "${h}\$" "${rlfile}"; then
 				echo "${h}" | tr -d " " >> "${rlfile}"
 				success "added \"${h}\" to runlevel \"${i}\""
 			else
@@ -113,50 +105,42 @@ display_itype_msg() {
 			o = 1;
 			print;
 		}
-		END && o { printf "\n\n"; }'   "${1}"
+		END && o { printf "\n\n"; }' "${1}"
 }
 
 del() {
 	shift
-	for q in "${@}"
-	do
-		if check_level "${q}"
-		then
+	for q in "${@}"; do
+		if check_level "${q}"; then
 			mylevels="${mylevels} ${q}"
-		elif check_script "${q}"
-		then
+		elif check_script "${q}"; then
 			myscripts="${myscripts} ${myscript}"
 		else
 			myscripts="${myscripts} ${q}"
 		fi
 	done
 
-	if [ -z "$(echo ${myscripts} | tr -d " " )" ]
-	then
+	if [ -z "$(echo ${myscripts} | tr -d " " )" ]; then
 		error "you didn't specify any script"
 		exit 1
 	fi
 	[ -z "${mylevels}" ] && mylevels="${all_levels}"
 
-	for h in ${myscripts}
-	do
+	for h in ${myscripts}; do
 		remlevels=""
 		ifile="${confdir}/${h}.i"
 		# Print some info when ng-update add if any in file.
 		display_itype_msg "${ifile}"
 
-		for i in ${mylevels}
-		do
+		for i in ${mylevels}; do
 			local rlfile=$(rl_file "${i}")
-			if grep -q "${rlfile}" -x -e "${h}\$"
-			then
+			if grep -q "${rlfile}" -x -e "${h}\$"; then
 				grep "${rlfile}" -x -v -e "${h}" > "${rlfile}.new"
 				mv "${rlfile}.new" "${rlfile}"
 				remlevels="${remlevels} ${i}"
 			fi
 		done
-		if [ -n "$(echo ${remlevels} | tr -d " ")" ]
-		then
+		if [ -n "$(echo ${remlevels} | tr -d " ")" ]; then
 			success "removed \"${h}\" from the runlevel(s):${remlevels}"
 		else
 			warning "\"${h}\" missing from all runlevels specified"
@@ -168,27 +152,22 @@ del() {
 show() {
 	case "${#}" in
 	1)
-		for g in ${script_dirs}
-		do
+		for g in ${script_dirs}; do
 			allscripts="${allscripts} $(find "${g}" -type f -name '*.i' 2>/dev/null | sed -e 's!'"${confdir}"'/\(.*\)\.[^\.]*$!\1!')"
 		done
 
-		for e in ${all_levels}
-		do
+		for e in ${all_levels}; do
 			local rlfile=$(rl_file "${e}")
 			# adds only if net/
 			allscripts="${allscripts} $(sed -ne 's/net\///p' "${rlfile}")"
 			export myscript_${e//-/_}="$(cat "${rlfile}")"
 		done
 
-		for f in ${allscripts}
-		do
+		for f in ${allscripts}; do
 			printf "%20s | " "${f:0:19}"
-			for c in ${all_levels}
-			do
+			for c in ${all_levels}; do
 				eval myscript=\$myscript_${c//-/_}
-				if echo "$myscript" | grep -q "$f"
-				then
+				if echo "$myscript" | grep -q "$f"; then
 					echo -n "${c} "
 				else
 					printf "%${#c}s " " "
@@ -196,80 +175,72 @@ show() {
 			done
 			echo
 		done
-      ;;
+		;;
 
-      2)
-         shift
+	2)
+		shift
 
-         if check_script "${1}"
-         then
-            printf "%20s | " "${1:0:19}"
-            for w in ${all_levels}
-            do
-               local rlfile=$(rl_file "${w}")
-               if grep -q ${rlfile} -e "${1}"
-               then
-                  echo -n "${w} "
-               else
-                  printf "%${#w}s " " "
-               fi
-            done
-            echo
-         else
-            if check_level "${1}"
-            then
-               for o in $( cat `rl_file "${1}"` | cut -d / -f2 )
-               do
-                  printf "%20s | " "${o:0:19}"
-                  echo -n "${1} "
-               done
-               echo
-            else
-               error "\"${1}\" isn't a script or a runlevel"
-            fi
-         fi
-      ;;
+		if check_script "${1}"; then
+			printf "%20s | " "${1:0:19}"
 
-      *)
-         usage
-      ;;
-   esac
+			for w in ${all_levels}; do
+				local rlfile=$(rl_file "${w}")
+
+				if grep -q ${rlfile} -e "${1}"; then
+					echo -n "${w} "
+				else
+					printf "%${#w}s " " "
+				fi
+			done
+			echo
+		else
+			if check_level "${1}"; then
+				for o in $( cat `rl_file "${1}"` | cut -d / -f2 ); do
+					printf "%20s | " "${o:0:19}"
+					echo -n "${1} "
+				done
+				echo
+			else
+				error "\"${1}\" isn't a script or a runlevel"
+			fi
+		fi
+		;;
+
+	*)
+		usage
+		;;
+	esac
 }
 
 check_script() {
-   local spath
-   if [ -e "${confdir}/${1}.i" ] || echo "${1}" | grep -q net/
-   then
-      myscript="${1}"
-      return 0
-   fi
-   for z in ${script_dirs}
-   do
-      if echo "${all_levels}" | grep -q "${1}"
-      then
-         break
-      else
-         if [ -e "${confdir}/${z}/${1}.i" ]
-         then
-            myscript="${z}/${1}"
-            return 0
-         fi
-     fi
-   done
-   spath="${1}"
-   while echo "${spath}" | grep -q /
-   do
-     spath="$( echo "${spath}" | sed -r 's/^(.*)\/(.*)/\1/' )"
-     echo "${spath}"
-     if [ -e "${confdir}/${spath}.i" ]
-     then
-	 warning "Cannot check \"${1}\" is a valid script"
-	 myscript="${1}"
-	 return 0
-     fi
-   done
-   myscript="${1}"
-   return 1
+	local spath
+	if [ -e "${confdir}/${1}.i" ] || echo "${1}" | grep -q net/; then
+		myscript="${1}"
+		return 0
+	fi
+
+	for z in ${script_dirs}; do
+		echo "${all_levels}" | grep -q "${1}" && break
+
+		if [ -e "${confdir}/${z}/${1}.i" ]; then
+			myscript="${z}/${1}"
+			return 0
+		fi
+	done
+
+	spath="${1}"
+	while echo "${spath}" | grep -q /; do
+		spath="$( echo "${spath}" | sed -r 's/^(.*)\/(.*)/\1/' )"
+		echo "${spath}"
+		if [ -e "${confdir}/${spath}.i" ]; then
+			warning "Cannot check \"${1}\" is a valid script"
+			myscript="${1}"
+			return 0
+		fi
+	done
+
+	myscript="${1}"
+	return 1
 }
 
 check_level() {
@@ -277,8 +248,7 @@ check_level() {
 }
 
 check_am_root() {
-	if [ "${EUID}" -ne 0 ]
-	then
+	if [ "${EUID}" -ne 0 ]; then
 		error "must be root"
 		exit 1
 	fi
@@ -289,13 +259,16 @@ add|a)
 	check_am_root
 	add $@
 	;;
+
 del|d|delete)
 	check_am_root
 	del $@
 	;;
+
 show|s|view)
 	show $@
 	;;
+
 *)
 	usage
 	;;

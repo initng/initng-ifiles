@@ -4,5 +4,10 @@
 
 daemon daemon/rsyncd {
 	need = system/bootmisc virtual/net;
+#ifd gentoo
+	env_file = /etc/conf.d/rsyncd;
+	exec daemon = @/usr/bin/rsync@ ${RSYNC_OPTS} --daemon --no-detach;
+#elsed
 	exec daemon = @/usr/bin/rsync@ --daemon --no-detach;
+#endd
 }

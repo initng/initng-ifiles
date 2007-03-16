@@ -2,7 +2,7 @@
 # DESCRIPTION:
 # WWW:
 
-daemon daemon/agetty/1 {
+daemon system/agetty/1 {
 	need = system/bootmisc;
 	provide = virtual/getty/1;
 	term_timeout = 3;
@@ -11,7 +11,7 @@ daemon daemon/agetty/1 {
 	last;
 }
 
-daemon daemon/agetty/* {
+daemon system/agetty/* {
 	need = system/bootmisc;
 	provide = virtual/getty/${NAME};
 	term_timeout = 3;
@@ -26,7 +26,7 @@ daemon daemon/agetty/* {
 	respawn;
 }
 
-virtual daemon/agetty {
-	need = daemon/agetty/2 daemon/agetty/3 daemon/agetty/4 daemon/agetty/5 daemon/agetty/6;
+virtual system/agetty {
+	need = system/agetty/2 system/agetty/3 system/agetty/4 system/agetty/5 system/agetty/6;
 	use = system/mountfs/essential service/issue;
 }

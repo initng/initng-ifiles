@@ -2,7 +2,7 @@
 # DESCRIPTION:
 # WWW:
 
-daemon daemon/mingetty/1 {
+daemon system/mingetty/1 {
 	need = system/bootmisc;
 	provide = virtual/getty/1;
 	term_timeout = 3;
@@ -11,7 +11,7 @@ daemon daemon/mingetty/1 {
 	last;
 }
 
-daemon daemon/mingetty/* {
+daemon system/mingetty/* {
 	need = system/bootmisc;
 	provide = virtual/getty/${NAME};
 	term_timeout = 3;
@@ -19,7 +19,7 @@ daemon daemon/mingetty/* {
 	respawn;
 }
 
-virtual daemon/mingetty {
-	need = daemon/mingetty/2 daemon/mingetty/3 daemon/mingetty/4 daemon/mingetty/5 daemon/mingetty/6;
+virtual system/mingetty {
+	need = system/mingetty/2 system/mingetty/3 system/mingetty/4 system/mingetty/5 system/mingetty/6;
 	use = system/mountfs/essential service/issue;
 }

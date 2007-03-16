@@ -2,7 +2,7 @@
 # DESCRIPTION:
 # WWW:
 
-daemon daemon/fgetty/1 {
+daemon system/fgetty/1 {
 	need = system/bootmisc;
 	provide = virtual/getty/1;
 	term_timeout = 3;
@@ -11,7 +11,7 @@ daemon daemon/fgetty/1 {
 	last;
 }
 
-daemon daemon/fgetty/* {
+daemon system/fgetty/* {
 	need = system/bootmisc;
 	provide = virtual/getty/${NAME};
 	term_timeout = 3;
@@ -19,7 +19,7 @@ daemon daemon/fgetty/* {
 	respawn;
 }
 
-virtual daemon/fgetty {
-	need = daemon/fgetty/2 daemon/fgetty/3 daemon/fgetty/4 daemon/fgetty/5 daemon/fgetty/6;
+virtual system/fgetty {
+	need = system/fgetty/2 system/fgetty/3 system/fgetty/4 system/fgetty/5 system/fgetty/6;
 	use = system/mountfs/essential service/issue;
 }

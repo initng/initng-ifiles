@@ -27,12 +27,12 @@ function gen_runlevel_common
 		[ -e /etc/raidtab -o -e /etc/mdadm.conf ] &&
 			add_service "${1}" system/sraid
 
-		if find_exe agetty; then
-			add_service "${1}" daemon/agetty
-		elif find_exe mingetty; then
-			add_service "${1}" daemon/mingetty
+		if find_exe mingetty; then
+			add_service "${1}" service/mingetty
+		elif find_exe agetty; then
+			add_service "${1}" service/agetty
 		elif find_exe getty; then
-			add_service "${1}" daemon/getty
+			add_service "${1}" service/getty
 		else
 			echo "Failed to find getty/agetty/mingetty, you must" \
 			" set that manually in ${CONFDIR}/${1}" >&2

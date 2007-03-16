@@ -1,5 +1,12 @@
 Version History:
 ---------------
+2007/03/15
+initng-ifiles 0.1.2
+    * Finally fixed genrunlevel for the new ifiles scheme.
+    * Some fixes for ng-update.
+    * Updated daemon/rsyncd.
+    * Moved all gettys to system/.
+
 2007/02/27
 initng-ifiles 0.1.1
     * Added yum-updatesd, named, apcupsd and fnfxd.

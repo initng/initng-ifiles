@@ -166,7 +166,7 @@ service system/udev/filldev {
 #elsed
 		if [ ! -e /etc/udev/links.conf -a ! -d /lib/udev/devices ]
 		then
-			# Some manually, youst to be sure.
+			# Some manually, just to be sure.
 			@/bin/ln@ -snf /proc/self/fd /dev/fd &
 			@/bin/ln@ -snf fd/0 /dev/stdin &
 			@/bin/ln@ -snf fd/1 /dev/stdout &

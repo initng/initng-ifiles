@@ -22,8 +22,8 @@
 import os,sys,optparse
 
 initng_dir='/etc/initng'
-dir_list=['','system','daemon','net']
-runlevel='default'
+dir_list=['','system','service','daemon','net']
+runlevel='runlevel/default'
 service_db={}
 
 parser=optparse.OptionParser(usage='%prog [options] [runlevel] ',version='%prog 1.1')
@@ -169,7 +169,13 @@ def open_srv_file(name):
     try:
 	infile=open(filename)
     except:
-	pass
+	filename=os.path.join(initng_dir,name+'.virtual')
+	try:
+	    infile=open(filename)
+	except:
+	    pass
+	else:
+	    return infile,1
     else:
 	return infile,1
 

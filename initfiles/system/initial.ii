@@ -2,9 +2,30 @@
 # DESCRIPTION:
 # WWW:
 
+# This one should be ran first, and only depend on virtcheck.
+# Its purpose is to mount /proc and /sys.
+service system/initial/mountvirtfs {
+	critical;
+	script start = {
+		# test, if all necessary directories exist.
+		if [ ! -d /proc -o ! -d /sys ] 
+		then
+			echo "The /sys or /proc is missing, can't mount it!" >&2
+			echo "Please sulogin, remount rw and create them." >&2
+			exit 1 # It can't work. Critical!
+		fi
+
+		mount -n -t proc proc /proc &
+		mount -n -t sysfs sys /sys &
+
+		wait
+		exit 0
+	};
+}
 
 # Check for virtualization
 service system/initial/virtcheck {
+	need = system/initial/mountvirtfs;
 	critical;
 	script start = {
 		[ -e /proc/cpuinfo ] || exit 0
@@ -37,30 +58,6 @@ service system/initial/virtcheck {
 
 	script stop = {
 		[ -e /dev/initng/isvirt ] && rm -f /dev/initng/isvirt
-		exit 0
-	};
-}
-
-# This one should be ran first, and only depend on virtcheck.
-# Its purpose is to mount /proc /dev and /sys.
-service system/initial/mountvirtfs {
-	need = system/initial/virtcheck;
-	critical;
-	script start = {
-		[ -e /dev/initng/isvirt ] && exit 0
-
-		# test, if all necessary directories exist.
-		if [ ! -d /proc -o ! -d /sys ] 
-		then
-			echo "The /sys or /proc is missing, can't mount it!" >&2
-			echo "Please sulogin, remount rw and create them." >&2
-			exit 1 # It can't work. Critical!
-		fi
-
-		mount -n -t proc proc /proc &
-		mount -n -t sysfs sys /sys &
-
-		wait
 		exit 0
 	};
 }

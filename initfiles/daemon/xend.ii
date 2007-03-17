@@ -1,0 +1,18 @@
+# NAME:
+# DESCRIPTION:
+# WWW:
+ 
+daemon daemon/xend {
+	need = system/bootmisc virtual/net/lo system/modules/blkbk system/modules/blktap system/modules/netbk system/modules/netloop;
+	use = system/mountfs;
+	pid_file = /var/run/xend/xend.pid;
+	script daemon = {
+		if ! grep -q "control_d" /proc/xen/capabilities
+		then
+			@/usr/sbin/xend@ start
+		else
+			exit 1
+		fi
+	};
+	exec kill  = @/usr/sbin/xend@ stop;
+}

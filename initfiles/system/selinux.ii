@@ -5,27 +5,7 @@
 service system/selinux/dev {
 	need = system/initial/mountvirtfs;
 	script start = {
-		check_selinux() {
-			while read dev mp fs stuff
-			do
-				[ "$fs" = "selinuxfs" ] && echo "$mp"
-			done
-		}
-		# Check SELinux status
-		#selinuxfs=`@awk@ '$3=="selinuxfs" {print $2}' /proc/mounts`
-		selinuxfs=`check_selinux`
-		SELINUX=
-		if [ -n "${selinuxfs}" -a "`@cat@ /proc/self/attr/current`" != "kernel" ]
-		then
-			if [ -r ${selinuxfs}/enforce ]
-			then
-				SELINUX=`@cat@ ${selinuxfs}/enforce`
-			else
-				# assume enforcing if you can't read it
-				SELINUX=1
-			fi
-		fi
-		if [ -n "${SELINUX}" -a -x @/sbin/restorecon@ ] && @fgrep@ -q " /dev " /proc/mounts
+		if [ -x @/sbin/restorecon@ ] && @fgrep@ -q " /dev " /proc/mounts
 		then
 			@/sbin/restorecon@ -R /dev 2>/dev/null
 		fi

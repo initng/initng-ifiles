@@ -4,7 +4,7 @@
 
 # Contributed by Roy Marples (uberlord@gentoo.org)
 
-# Map the dns, ntp and nis info so our system module can apply the setup 
+# Map the dns, ntp and nis info so our system module can apply the setup
 
 export dns_domain_${interface}="${domain}"
 export dns_servers_${interface}="${dns}"
@@ -13,5 +13,8 @@ export ntp_servers_${interface}="${ntpsrv}"
 
 export nis_domain_${interface}="${nisdomain}"
 export nis_servers_${interface}="${nissrv}"
+
+# This is a hack
+export INITNG_PLUGIN_DIR=/lib/initng
 
 ${INITNG_PLUGIN_DIR}/scripts/net/dhcp "$@"

@@ -7,7 +7,7 @@ service system/modules/depmod {
 	script start = {
 		# Should not fail if kernel do not have module
 		# support compiled in ...
-		[ -e /dev/initng/isvirt -o ! -f /proc/modules ] && exit 0
+		[ -f /proc/modules ] || exit 0
 
 		# Here we should fail, as a modular kernel do need
 		# depmod command ...
@@ -59,13 +59,11 @@ service system/modules/dm-mod {
 	need = system/initial;
 	stdall = /dev/null;
 	script start = {
-		[ -e /dev/initng/isvirt ] ||
-			@/sbin/modprobe@ -q dm-mod
+		@/sbin/modprobe@ -q dm-mod
 		exit 0
 	};
 	script stop = {
-		[ -e /dev/initng/isvirt ] ||
-			@/sbin/modprobe@ -q -r dm-mod
+		@/sbin/modprobe@ -q -r dm-mod
 		exit 0
 	};
 }
@@ -75,13 +73,11 @@ service system/modules/* {
 	use = system/modules/depmod;
 	stdall = /dev/null;
 	script start = {
-		[ -e /dev/initng/isvirt ] ||
-			@/sbin/modprobe@ -q ${NAME}
+		@/sbin/modprobe@ -q ${NAME}
 		exit 0
 	};
 	script stop = {
-		[ -e /dev/initng/isvirt ] ||
-			@/sbin/modprobe@ -q -r ${NAME}
+		@/sbin/modprobe@ -q -r ${NAME}
 		exit 0
 	};
 }
@@ -90,8 +86,6 @@ service system/modules {
 	need = system/initial system/mountroot system/modules/loop;
 	use = system/modules/depmod;
 	script start = {
-		[ -e /dev/initng/isvirt ] && exit 0
-
 		load_modules() {
 			[ -r "${1}" ] || return 1
 			@grep@ -v "^#" "${1}" | @grep@ -v "^$" | while read MODULE MODARGS

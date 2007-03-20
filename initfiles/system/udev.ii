@@ -62,10 +62,6 @@ service system/udev/mountdev {
 		# mount a tmpfs over /dev, if somebody did not already do it
 		@grep@ -Eq "^[^[:space:]]+[[:space:]]+/dev[[:space:]]+tmpfs[[:space:]]+" /proc/mounts && exit 0
 
-		# Save the virtualization info
-		isvirt=
-		[ -e /dev/initng/isvirt ] && isvirt=$(</dev/initng/isvirt)
-
 #ifd debian ubuntu
 		# /dev/.static/dev is used by MAKEDEV to access the real /dev directory.
 		# /etc/udev is recycled as a temporary mount point because it's the only
@@ -91,9 +87,6 @@ service system/udev/mountdev {
 		# Send SIGHUP to initng, will reopen /dev/initctl and /dev/initng.
 		# we can't assume that initng has pid 1, e.g. when booting from initrd
 		@/bin/killall@ -HUP initng
-
-		# Restore the virtualization info
-		[ -n "${isvirt}" ] && echo "${isvirt}" > /dev/initng/isvirt
 
 		exit 0
 	};

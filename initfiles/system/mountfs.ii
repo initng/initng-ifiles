@@ -9,8 +9,6 @@ service system/mountfs/essential {
 	never_kill;
 
 	script start = {
-		[ -e /dev/initng/isvirt ] && exit 0
-
 		for mp in /tmp /usr /var /srv /opt
 		do
 			@grep@ -q "[[:space:]]${mp}[[:space:]]" /etc/fstab &&
@@ -27,8 +25,6 @@ service system/mountfs/essential {
 		echo "Sending all processes the KILL signal ..."
 		@killalli5:killall5@ -9
 		sleep 1
-
-		[ -e /dev/initng/isvirt ] && exit 0
 
 		@sed@ 's:^\S*\s*::' /etc/mtab | @sort@ -r | while read mp drop
 		do
@@ -52,7 +48,6 @@ service system/mountfs/home {
 	never_kill;
 
 	script start = {
-		[ -e /dev/initng/isvirt ] ||
 		@grep@ -q "[[:space:]]/home[[:space:]]" /etc/fstab &&
 			@mount@ -v /home
 		exit 0
@@ -66,13 +61,11 @@ service system/mountfs/network {
 	env NET_FS = afs,cifs,coda,davfs,gfs,ncpfs,nfs,nfs4,ocfs2,shfs,smbfs;
 
 	script start = {
-		[ -e /dev/initng/isvirt ] ||
 		@mount@ -a -F -t ${NET_FS} ||
 			@mount@ -a -t ${NET_FS}
 	};
 
 	script stop = {
-		[ -e /dev/initng/isvirt ] ||
 		@umount@ -a -f -t ${NET_FS}
 	};
 }
@@ -83,7 +76,6 @@ service system/mountfs {
 	never_kill;
 
 	script start = {
-		[ -e /dev/initng/isvirt ] ||
 		@mount@ -a -v -t reiserfs,reiser4,reiserfs,reiser4,ext2,ext3,xfs,jfs,vfat,ntfs,ntfs-3g,tmpfs,subfs,bind,auto
 		exit 0
 	};

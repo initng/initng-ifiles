@@ -1,0 +1,31 @@
+# Check for virtualization
+checkvirt() {
+	[ -e /proc/cpuinfo ] && return 1
+
+	# is Xen?
+	[ -r /proc/xen/capabilities ] &&
+	grep -q 'control_d' /proc/xen/capabilities || {
+		echo xen
+		return 0
+	}
+
+	# is VServer or OpenVZ?
+	egrep -q '(s_context|VxID|envID):[[:space:]]*[1-9]' /proc/self/status && {
+		echo vps
+		return 0
+	}
+
+	# is UML?
+	grep -q 'UML' /proc/cpuinfo && {
+		echo uml
+		return 0
+	}
+
+	# is coLinux?
+	@grep@ -q ' cobd$' /proc/devices && {
+		echo colinux
+		return 0
+	}
+
+	return 1
+}

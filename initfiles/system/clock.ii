@@ -13,7 +13,7 @@ service system/clock {
 #endd
 
 	script start = {
-		[ -e /dev/initng/isvirt -o ! -x @/sbin/hwclock@ ] && exit 0
+		[ -x @/sbin/hwclock@ ] || exit 0
 #ifd debian
 		[ "${HWCLOCKACCESS}" = "yes" ] || exit 0
 #endd
@@ -72,7 +72,7 @@ service system/clock {
 	};
 
 	script stop = {
-		[ -e /dev/initng/isvirt -o ! -x @/sbin/hwclock@ ] && exit 0
+		[ -x @/sbin/hwclock@ ] || exit 0
 #ifd debian
 		[ "${HWCLOCKACCESS}" = "yes" ] || exit 0
 #endd

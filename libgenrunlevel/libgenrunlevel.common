@@ -27,10 +27,10 @@ function gen_runlevel_common
 		[ -e /etc/raidtab -o -e /etc/mdadm.conf ] &&
 			add_service "${1}" system/sraid
 
-		if find_exe mingetty; then
-			add_service "${1}" service/mingetty
-		elif find_exe agetty; then
+		if find_exe agetty; then
 			add_service "${1}" service/agetty
+		elif find_exe mingetty; then
+			add_service "${1}" service/mingetty
 		elif find_exe getty; then
 			add_service "${1}" service/getty
 		else

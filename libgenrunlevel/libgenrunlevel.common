@@ -28,11 +28,11 @@ function gen_runlevel_common
 			add_service "${1}" system/sraid
 
 		if find_exe agetty; then
-			add_service "${1}" service/agetty
+			add_service "${1}" system/agetty
 		elif find_exe mingetty; then
-			add_service "${1}" service/mingetty
+			add_service "${1}" system/mingetty
 		elif find_exe getty; then
-			add_service "${1}" service/getty
+			add_service "${1}" system/getty
 		else
 			echo "Failed to find getty/agetty/mingetty, you must" \
 			" set that manually in ${CONFDIR}/${1}" >&2

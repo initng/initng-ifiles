@@ -21,9 +21,13 @@ service system/selinux/relabel {
 				[ "$fs" = "selinuxfs" ] && echo "$mp"
 			done
 		}
+		
 		# Check SELinux status
 		#selinuxfs=`@awk@ '$3=="selinuxfs" {print $2}' /proc/mounts`
-		selinuxfs="`check_selinux`"
+		#selinuxfs="`check_selinux`"
+		#hardcode path for now
+		#check_selinux seems to cause boot hangs
+		selinuxfs="/selinux"
 		SELINUX=
 		if [ -n "${selinuxfs}" -a "`@cat@ /proc/self/attr/current`" != "kernel" ]
 		then

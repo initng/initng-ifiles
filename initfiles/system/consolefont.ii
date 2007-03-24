@@ -4,7 +4,6 @@
 
 service system/consolefont {
 	need = system/bootmisc system/keymaps;
-	env ttydev=/dev/tty;
 	env RC_TTY_NUMBER=11;
 #ifd fedora pingwinek mandriva
 	# env_file = /etc/sysconfig/i18n;
@@ -28,13 +27,6 @@ service system/consolefont {
 			do
 				. ${i}
 			done
-		fi
-		# Different device name for 2.6 kernels and devfs
-		if [ `@uname@ -r | @cut@ -f 2 -d .` = 6 -a -e /dev/.devfsd ]
-		then
-			VCSTIME_OPT="-2 /dev/vcsa0"
-		else
-			VCSTIME_OPT=
 		fi
 #endd
 		[ -n "${SCREEN_FONT}" ] && CONSOLEFONT="${SCREEN_FONT}"
@@ -82,8 +74,14 @@ service system/consolefont {
 
 			for x in `@seq@ 1 ${RC_TTY_NUMBER}`
 			do
+#ifd fedora
+				echo -n -e "\033%G" > /dev/tty${x}
+#endd
 				${SETFONT} ${CONSOLEFONT} ${param} \
-				${sf_param}/${ttydev}${x} >/dev/null
+				${sf_param}/dev/tty${x} >/dev/null
+#ifd fedora
+				echo -n -e "\033(K" > /dev/tty${x}
+#endd
 				retval=0
 			done
 		else

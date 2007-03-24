@@ -48,8 +48,8 @@ service system/hostname {
 		# /etc/env.d/01hostname in gentoo is setted by init-script.
 		# i say, you should set a link:
 		#         /etc/conf.d/hostname <- /etc/env.d/01hostname
-		[ ! -L /etc/env.d/01hostname ] && \
-			@rm@ /etc/env.d/01hostname 2>&1 >/dev/null && \
+		[ ! -L /etc/env.d/01hostname ] &&
+			@rm@ /etc/env.d/01hostname >/dev/null 2>&1 &&
 			echo 'HOSTNAME="'"$(@/bin/hostname@)"'"' 2>/dev/null >/etc/env.d/01hostname
 		exit ${ret}
 #elsed

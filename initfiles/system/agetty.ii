@@ -3,7 +3,7 @@
 # WWW:
 
 daemon system/agetty/1 {
-	need = system/bootmisc;
+	need = system/bootmisc system/mountfs/home;
 	provide = virtual/getty/1;
 	term_timeout = 3;
 	exec daemon = @/sbin/agetty@ 38400 tty1;
@@ -12,7 +12,7 @@ daemon system/agetty/1 {
 }
 
 daemon system/agetty/* {
-	need = system/bootmisc;
+	need = system/bootmisc system/mountfs/home;
 	provide = virtual/getty/${NAME};
 	term_timeout = 3;
 	script daemon = {

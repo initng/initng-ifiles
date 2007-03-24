@@ -3,7 +3,7 @@
 # WWW:
 
 daemon system/mingetty/1 {
-	need = system/bootmisc;
+	need = system/bootmisc system/mountfs/home;
 	provide = virtual/getty/1;
 	term_timeout = 3;
 	exec daemon = @/sbin/mingetty@ tty1;
@@ -12,7 +12,7 @@ daemon system/mingetty/1 {
 }
 
 daemon system/mingetty/* {
-	need = system/bootmisc;
+	need = system/bootmisc system/mountfs/home;
 	provide = virtual/getty/${NAME};
 	term_timeout = 3;
 	exec daemon = @/sbin/mingetty@ tty${NAME};

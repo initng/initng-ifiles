@@ -3,7 +3,7 @@
 # WWW:
 
 daemon system/qingy/1 {
-	need = system/bootmisc;
+	need = system/bootmisc system/mountfs/home;
 	provide = virtual/getty/1;
 	exec daemon = @/sbin/qingy@ tty1;
 	respawn;
@@ -11,7 +11,7 @@ daemon system/qingy/1 {
 }
 
 daemon system/qingy/* {
-	need = system/bootmisc;
+	need = system/bootmisc system/mountfs/home;
 	provide = virtual/getty/${NAME};
 	exec daemon = @/sbin/qingy@ tty${NAME};
 	respawn;

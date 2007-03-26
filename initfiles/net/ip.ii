@@ -13,5 +13,5 @@ service net/ip/* {
 	script stop = {
 		@ip@ link set ${NAME} down
 		@ip@ addr del ${config_$NAME} ${NAME}
-	}
+	};
 }

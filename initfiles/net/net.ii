@@ -3,7 +3,7 @@
 # WWW: 
 
 
-#ifd debian linspire pingwinek
+#ifd debian linspire pingwinek ubuntu
 service net/all {
         stdall = /dev/null;
         need = system/bootmisc;

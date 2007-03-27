@@ -7,7 +7,7 @@ daemon daemon/kdm {
 	conflict = daemon/gdm daemon/wdm daemon/xdm;
 	use = daemon/xfs system/modules system/coldplug service/faketty;
 	provide = virtual/dm;
-#ifd debian
+#ifd debian fedora
 	exec daemon = @/usr/bin/kdm@ -nodaemon;
 #elsed
 	exec daemon = @/usr/sbin/kdm:/usr/bin/kdm@ -nodaemon;

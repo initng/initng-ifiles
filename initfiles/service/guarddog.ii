@@ -1,11 +1,11 @@
-# NAME: 
-# DESCRIPTION: 
-# WWW: 
+# NAME:
+# DESCRIPTION:
+# WWW:
 
 service service/guarddog {
 	need = system/initial;
 	provide = virtual/firewall;
-	script start = /etc/rc.firewall;
+	exec start = /etc/rc.firewall;
 	script stop = {
 		if [ ! -x @/sbin/iptables:/sbin/ipchains@ ]
 		then

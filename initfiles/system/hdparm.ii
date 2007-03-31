@@ -16,7 +16,8 @@ service system/hdparm {
 				orgdevice=`readlink -f ${device}`
 				if [ -b "${orgdevice}" ]
 				then
-					@hdparm@ ${args} ${device} >/dev/null || echo "Failed to run hdparm on ${device}." &
+					@hdparm@ ${args} ${device} >/dev/null ||
+					echo "Failed to run hdparm on ${device}." &
 				fi
 			fi
 		}
@@ -98,6 +99,7 @@ service system/hdparm {
 				fi
 			done
 		fi
+		wait
 		exit 0
 	};
 }

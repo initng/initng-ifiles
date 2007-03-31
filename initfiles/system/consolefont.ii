@@ -74,14 +74,8 @@ service system/consolefont {
 
 			for x in `@seq@ 1 ${RC_TTY_NUMBER}`
 			do
-#ifd fedora
-				echo -n -e "\033%G" > /dev/tty${x}
-#endd
 				${SETFONT} ${CONSOLEFONT} ${param} \
 				${sf_param}/dev/tty${x} >/dev/null
-#ifd fedora
-				echo -n -e "\033(K" > /dev/tty${x}
-#endd
 				retval=0
 			done
 		else

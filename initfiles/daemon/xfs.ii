@@ -65,7 +65,7 @@ daemon daemon/xfs {
 #ifd debian
 	exec daemon = @/usr/X11R6/bin/xfs@ -droppriv -nodaemon;
 #elsed gentoo
-	env ${XFS_PORT} = "-1";
+	env XFS_PORT = "-1";
 	env_file = /etc/conf.d/xfs;
 	exec daemon = /usr/bin/xfs -nodaemon -config /etc/X11/fs/config -droppriv -user xfs -port ${XFS_PORT};
 #elsed

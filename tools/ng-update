@@ -105,7 +105,7 @@ display_itype_msg() {
 			o = 1;
 			print;
 		}
-		END && o==1 { printf "\n\n"; }' "${1}"
+		END { if (o) printf "\n\n"; }' "${1}"
 }
 
 del() {

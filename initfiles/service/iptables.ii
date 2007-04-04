@@ -10,6 +10,8 @@ service service/iptables {
 #elsed
 	env STATEFILE = /var/lib/iptables/rules-save;
 #endd
-	stdin = ${STATEFILE};
-	exec start = @/sbin/iptables-restore@ -c;
+	script start = {
+		[ -f "${STATEFILE}" ] || exit 0
+		@/sbin/iptables-restore@ -c < "${STATEFILE}"
+	};
 }

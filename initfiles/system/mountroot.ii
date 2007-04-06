@@ -126,20 +126,17 @@ service system/mountroot/rootrw {
 	use = system/mountroot/evms system/mountroot/lvm system/mountroot/dmsetup;
 	critical;
 	script start = {
-		if @mount@ -vnf -o remount / | @grep@ "\(.*rw.*\)"
-		then
-			@mount@ -n -o remount,rw / >/dev/null 2>&1
+		@mount@ -n -o remount,rw / >/dev/null 2>&1
 #ifd pingwinek
-			# code 32 means 'not implemented', we got it on livecd using
-			# unionfs combined with squashfs
-			if [ ${?} -ne 0 -a ${?} -ne 32 ]
+		# code 32 means 'not implemented', we got it on livecd using
+		# unionfs combined with squashfs
+		if [ ${?} -ne 0 -a ${?} -ne 32 ]
 #elsed
-			if [ ${?} -ne 0 ]
+		if [ ${?} -ne 0 ]
 #endd
-				then
-				echo "Root filesystem could not be mounted read/write :("
-				exit 1
-			fi
+		then
+			echo "Root filesystem could not be mounted read/write :("
+			exit 1
 		fi
 	};
 	script stop = {

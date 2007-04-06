@@ -26,19 +26,20 @@ service system/mountfs/essential {
 		@killalli5:killall5@ -9
 		sleep 1
 
-		@sed@ 's:^\S*\s*::' /etc/mtab | @sort@ -r | while read mp drop
+		FILES="`@sed@ 's:^\S*\s*::' /etc/mtab | @sort@ -r`"
+
+		echo "${FILES}" | while read mp drop
 		do
 			case "${mp}" in
-				/proc|/sys|/dev|/usr|/) ;;
+				/proc|/sys|/dev|/) ;;
 				*)
-					@umount@ -r -d -f "${mp}" ||
-					echo "WARNING, failed to umount ${mp}" &
+					@mountpoint@ -q "${mp}" && {
+						@umount@ -r -d -f "${mp}" ||
+						echo "WARNING, failed to umount ${mp}"
+					}
 					;;
 			esac
 		done
-
-		@umount@ -r -d -f /usr || echo "WARNING, failed to umount /usr" &
-		wait
 		exit 0
 	};
 }

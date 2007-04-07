@@ -1,0 +1,10 @@
+# NAME: SLIM 
+# DESCRIPTION: The "slim" desktop-independent login manager. 
+# WWW: http://slim.berlios.de/  
+
+daemon daemon/slim { 
+   need = system/bootmisc; 
+   conflict = daemon/kdm daemon/wdm daemon/xdm daemon/entraced daemon/gdm; 
+   provide = virtual/dm; 
+   exec daemon = /usr/bin/slim;  
+}

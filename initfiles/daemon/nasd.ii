@@ -1,0 +1,11 @@
+# NAME: Network Audio System
+# DESCRIPTION:
+# WWW:
+
+daemon daemon/nasd {
+	need = system/initial system/bootmisc system/mountfs;
+	use = system/alsasound;
+	respawn;
+
+	exec daemon = @/usr/bin/nasd@;
+}

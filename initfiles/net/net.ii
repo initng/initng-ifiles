@@ -1,6 +1,6 @@
-# NAME: 
-# DESCRIPTION: 
-# WWW: 
+# NAME:
+# DESCRIPTION:
+# WWW:
 
 
 #ifd debian linspire pingwinek ubuntu
@@ -41,9 +41,10 @@ service net/all {
                 /etc/net/scripts/initconf write
                 /etc/net/scripts/network.init start
 	};
-        script stop = {
-                /etc/net/scripts/network.init stop
-	};
+        exec stop = /etc/net/scripts/network.init stop;
+#elsed sourcemage
+	exec start = /etc/init.d/network start;
+	exec stop = /etc/init.d/network stop;
 #endd
 }
 #endd
@@ -86,7 +87,7 @@ service net/* {
 
         use = system/modules system/coldplug daemon/cardmgr;
         provide = virtual/net virtual/net/${NAME};
- 
+
 #ifd gentoo
         exec start = ${INITNG_PLUGIN_DIR}/scripts/net/interface ${NAME} start;
         exec stop = ${INITNG_PLUGIN_DIR}/scripts/net/interface ${NAME} stop;

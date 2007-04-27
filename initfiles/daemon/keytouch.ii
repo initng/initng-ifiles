@@ -1,0 +1,11 @@
+# NAME: keytouch
+# DESCRIPTION: Initializes kernel keymappings for multimedia keyboard's
+#              extra function keys. This mappings are used by the keytouch
+#              daemon inside an X session to assign actions to those keys.
+# WWW: http://keytouch.sourceforge.net/
+
+daemon daemon/keytouch {
+	need = system/bootmisc;
+	env KEYBOARD_FILE = /etc/keytouch/current_keyboard.xml;
+	exec daemon = @/usr/bin/keytouch-init@;
+}

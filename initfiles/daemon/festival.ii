@@ -1,0 +1,10 @@
+# NAME: festival
+# DESCRIPTION: Speech synthesis software
+# WWW: http://www.cstr.ed.ac.uk/projects/festival/
+
+daemon daemon/festival {
+	need = system/bootmisc;
+	suid = nobody;
+	sgid = audio;
+	exec daemon = @/usr/bin/festival@ --server;
+}

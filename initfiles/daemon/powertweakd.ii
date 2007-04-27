@@ -1,0 +1,9 @@
+# NAME: Powertweak
+# DESCRIPTION: Powertweak is a tool to tune kernel and hardware
+#              configuration for optimal performance.
+# WWW: http://powertweak.sourceforge.net/
+
+daemon daemon/powertweakd {
+	need = system/bootmisc;
+	exec daemon = @/usr/sbin/powertweakd@ --no-daemon;
+}

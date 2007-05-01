@@ -6,7 +6,7 @@ service system/keymaps {
 	need = system/bootmisc;
 	use = system/sysctl;
 
-	env ttydev=/dev/tty;
+	env ttydev = /dev/tty;
 #ifd debian linspire
 	env CONFDIR=/etc/console;
 	env CONFFILEROOT=boottime;
@@ -19,6 +19,8 @@ service system/keymaps {
 #elsed gentoo enlisy
 	env_file = /etc/rc.conf;
 	env_file = /etc/conf.d/keymaps;
+#elsed sourcemage
+	env_file = /etc/sysconfig/keymap;
 #elsed
 	env_file = /etc/keymaps.conf;
 #endd
@@ -105,7 +107,11 @@ service system/keymaps {
 		# Set terminal encoding to either ASCII or UNICODE.
 		# See utf-8(7) for more information.
 		termencoding=
+#ifd sourcemage
+		if [ -n "${UNICODE_START}" ]
+#elsed
 		if [ "${UNICODE}" = "yes" ]
+#endd
 		then
 			dumpkey_opts=""
 			[ -n "${DUMPKEYS_CHARSET}" ] && dumpkey_opts="-c ${DUMPKEYS_CHARSET}"

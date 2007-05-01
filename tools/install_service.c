@@ -243,8 +243,8 @@ static const char *probe_distribution(void)
         return ("kanotix");
     if (is_file("/etc/lfs-release"))
         return ("lfs");
-    if (is_file("/etc/silverfox-version"))
-        return ("silverfox");
+    if (is_file("/etc/sourcemage-release"))
+        return ("sourcemage");
     if (is_file("/etc/enlisy-release"))
         return ("enlisy");
 

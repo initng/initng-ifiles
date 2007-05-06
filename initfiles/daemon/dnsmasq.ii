@@ -5,8 +5,6 @@
 daemon daemon/dnsmasq {
 	need = system/initial virtual/net;
 	stdall = /dev/null;
-	exec daemon = @/usr/sbin/dnsmasq@;
-	pid_file = /var/run/dnsmasq.pid;
-	forks;
+	exec daemon = @/usr/sbin/dnsmasq@ -k;
 	respawn;
 }

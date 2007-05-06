@@ -7,12 +7,14 @@ daemon daemon/dbus {
 	forks;
 #ifd fedora altlinux mandriva
 	pid_file = /var/run/messagebus.pid;
-#elsed debian pingwinek
+#elsed debian
 	env DAEMONUSER=messagebus;
 	env PIDDIR = /var/run/dbus;
 	env PIDFILE = ${PIDDIR}/pid;
 	env_file = /etc/default/dbus;
 	pid_file = ${PIDFILE};
+#ifd pingwinek sourcemage
+	pid_file = /var/run/dbus/pid;
 #elsed
 	pid_file = /var/run/dbus.pid;
 #endd

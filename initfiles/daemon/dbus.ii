@@ -13,6 +13,7 @@ daemon daemon/dbus {
 	env PIDFILE = ${PIDDIR}/pid;
 	env_file = /etc/default/dbus;
 	pid_file = ${PIDFILE};
+#endd
 #ifd pingwinek sourcemage
 	pid_file = /var/run/dbus/pid;
 #elsed

@@ -15,7 +15,7 @@ service system/clock {
 	script start = {
 		[ -x @/sbin/hwclock@ ] || exit 0
 #ifd debian
-		[ "${HWCLOCKACCESS}" = "yes" ] || exit 0
+		[ "${HWCLOCKACCESS}" = "no" ] && exit 0
 #endd
 
 		setupopts() {
@@ -74,7 +74,7 @@ service system/clock {
 	script stop = {
 		[ -x @/sbin/hwclock@ ] || exit 0
 #ifd debian
-		[ "${HWCLOCKACCESS}" = "yes" ] || exit 0
+		[ "${HWCLOCKACCESS}" = "no" ] && exit 0
 #endd
 
 		setupopts() {

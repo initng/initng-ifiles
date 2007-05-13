@@ -43,8 +43,19 @@ service net/all {
 	};
         exec stop = /etc/net/scripts/network.init stop;
 #elsed sourcemage
-	exec start = /etc/init.d/network start;
-	exec stop = /etc/init.d/network stop;
+	script start = {
+		export _OBEY_UP_ON_BOOT=1
+		for DEVICE in ${devices}; do
+			[ "${DEVICE}" = "lo" ] && continue
+			@/sbin/ifup@ "${DEVICE}"
+		done
+	};
+	script stop = {
+		for DEVICE in ${devices}; do
+			[ "${DEVICE}" = "lo" ] && continue
+			@/sbin/ifdown@ "${DEVICE}"
+		done
+	};
 #endd
 }
 #endd

@@ -1,5 +1,12 @@
 Version History:
 ---------------
+2007/05/24
+initng-ifiles 0.1.3
+    * Fixed some bugs in ng-update.
+    * Added support for SourceMage.
+    * New services: xend, nasd, festival, powertweak, keytouch.
+    * A lot of bugfixes.
+
 2007/03/15
 initng-ifiles 0.1.2
     * Finally fixed genrunlevel for the new ifiles scheme.

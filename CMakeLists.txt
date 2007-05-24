@@ -1,6 +1,6 @@
 PROJECT(initng-ifiles C)
 
-SET(VERSION "0.1.2-svn" CACHE STRING "Version number of the project")
+SET(VERSION "0.1.3-svn" CACHE STRING "Version number of the project")
 
 IF(CMAKE_BACKWARDS_COMPATIBILITY LESS 2.2)
 	MESSAGE(FATAL_ERROR "Error: Your CMake version is too old. This project requires version 2.2 or newer.")

@@ -10,5 +10,5 @@ daemon daemon/spamd {
 #else
 	env OPTIONS = -c;
 #endd
-	exec daemon = @/usr/sbin/spamd:/usr/bin/spamd@ ${OPTIONS};
+	exec daemon = @/usr/bin/spamd:/usr/sbin/spamd@ ${OPTIONS};
 }

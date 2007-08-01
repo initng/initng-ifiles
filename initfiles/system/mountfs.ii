@@ -11,8 +11,7 @@ service system/mountfs/essential {
 	script start = {
 		for mp in /tmp /usr /var /srv /opt
 		do
-			@grep@ -q "[[:space:]]${mp}[[:space:]]" /etc/fstab &&
-			@mount@ -v "${mp}" &
+			@mount@ -v "${mp}" 2>/dev/null &
 		done
 		wait
 		exit 0
@@ -26,18 +25,20 @@ service system/mountfs/essential {
 		@killalli5:killall5@ -9
 		sleep 1
 
-		FILES="`@sed@ 's:^\S*\s*::' /etc/mtab | @sort@ -r`"
+		MPS="$(
+			while read d mp d
+			do
+				echo "${mp}"
+			done < /proc/mounts | @sort@ -r
+		)"
 
-		echo "${FILES}" | while read mp drop
+		echo "${MPS}" | while read mp d
 		do
 			case "${mp}" in
-				/proc|/sys|/dev|/) ;;
-				*)
-					@mountpoint@ -q "${mp}" && {
-						@umount@ -r -d -f "${mp}" ||
-						echo "WARNING, failed to umount ${mp}"
-					}
-					;;
+			/|/proc|/sys|/dev*) ;;
+			*)
+				@umount@ -r -d -f "${mp}"
+				;;
 			esac
 		done
 		exit 0
@@ -46,13 +47,11 @@ service system/mountfs/essential {
 
 service system/mountfs/home {
 	need = system/mountroot system/checkfs;
+	stderr = /dev/null;
+	start_fail_ok;
 	never_kill;
 
-	script start = {
-		@grep@ -q "[[:space:]]/home[[:space:]]" /etc/fstab &&
-			@mount@ -v /home
-		exit 0
-	};
+	exec start = @mount@ -v /home;
 }
 
 service system/mountfs/network {
@@ -62,22 +61,22 @@ service system/mountfs/network {
 	env NET_FS = afs,cifs,coda,davfs,gfs,ncpfs,nfs,nfs4,ocfs2,shfs,smbfs;
 
 	script start = {
-		@mount@ -a -F -t ${NET_FS} ||
-			@mount@ -a -t ${NET_FS}
+		@mount@ -a -v -F -t ${NET_FS} 2>/dev/null ||
+			@mount@ -a -v -t ${NET_FS}
 	};
 
-	script stop = {
-		@umount@ -a -f -t ${NET_FS}
-	};
+	exec stop = @umount@ -a -f -t ${NET_FS};
 }
 
 service system/mountfs {
 	need = system/mountfs/essential system/mountfs/home;
 	use = system/mountfs/network;
+	env LOCAL_FS = reiserfs,reiser4,reiserfs,reiser4,ext2,ext3,xfs,jfs,vfat,ntfs,ntfs-3g,tmpfs,subfs,bind,auto;
 	never_kill;
 
 	script start = {
-		@mount@ -a -v -t reiserfs,reiser4,reiserfs,reiser4,ext2,ext3,xfs,jfs,vfat,ntfs,ntfs-3g,tmpfs,subfs,bind,auto
+		@mount@ -a -F -v -t ${LOCAL_FS} 2>/dev/null ||
+		@mount@ -a -v -t ${LOCAL_FS}
 		exit 0
 	};
 }

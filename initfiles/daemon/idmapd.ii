@@ -3,6 +3,6 @@
 # WWW: 
 
 daemon daemon/idmapd {
-	need = system/initial daemon/portmap virtual/net;
+	need = system/initial virtual/portmap virtual/net;
 	exec daemon = @rpc.idmapd@ -f;
 }

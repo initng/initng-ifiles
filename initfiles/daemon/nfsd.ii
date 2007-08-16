@@ -4,7 +4,7 @@
 
 #ifd gentoo
 service daemon/nfsd {
-	need = system/initial daemon/portmap virtual/net;
+	need = system/initial virtual/portmap virtual/net;
 	env RPCNFSDCOUNT = 8;
 	env_file = /etc/conf.d/nfs;
 	script start = {
@@ -17,7 +17,7 @@ service daemon/nfsd {
 }
 #elsed
 daemon daemon/nfsd {
-	need = system/initial daemon/portmap;
+	need = system/initial virtual/portmap;
 	pid_of = rpc.nfsd;
 #ifd fedora mandriva
 	env_file = /etc/sysconfig/nfs;

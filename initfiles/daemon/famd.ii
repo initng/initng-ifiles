@@ -4,6 +4,6 @@
 
 daemon daemon/famd {
 	need = system/bootmisc virtual/net/lo;
-	use = daemon/portmap;
+	use = virtual/portmap;
 	exec daemon = @/usr/sbin/famd@ -T 0 -f -c /etc/fam.conf;
 }

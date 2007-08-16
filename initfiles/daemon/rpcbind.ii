@@ -1,0 +1,12 @@
+ # DESCRIPTION: 
+ # WWW: 
+ 
+daemon daemon/rpcbind {
+	need = system/bootmisc virtual/net;
+	provide = virtual/portmap;
+	forks;
+	pid_of = rpcbind;
+	env RPCBIND_ARGS=;
+	env_file = /etc/sysconfig/rpcbind;
+	exec daemon = /sbin/rpcbind ${RPCBIND_ARGS};
+}

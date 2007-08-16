@@ -4,6 +4,7 @@
 
 daemon daemon/portmap {
 	need = system/bootmisc virtual/net;
+	provide = virtual/portmap;
 	forks;
 	pid_of = portmap;
 #ifd debian linspire

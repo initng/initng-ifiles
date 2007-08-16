@@ -3,6 +3,6 @@
 # WWW: 
 
 daemon daemon/svcgssd {
-	need = system/initial daemon/portmap;
+	need = system/initial virtual/portmap;
 	exec daemon = @rpc.svcgssd@ -f;
 }

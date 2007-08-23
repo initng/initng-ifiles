@@ -9,7 +9,7 @@ function gen_runlevel
 {
 	[ "${1}" == "runlevel/system.virtual" ] && return 0
 
-	add_service "${1}" daemon/dcron daemon/hald daemon/klogd daemon/portmap
+	add_service "${1}" daemon/dcron daemon/hald daemon/rklogd daemon/rpcbind
 
 	# Check network interfaces
 	for i in $(ls /etc/sysconfig/network-scripts/ifcfg* | \

@@ -1,0 +1,10 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/rklogd {
+	need = system/bootmisc daemon/rsyslogd;
+	env_file = /etc/sysconfig/rsyslog;
+	exec daemon = /sbin/rklogd $KLOGD_OPTIONS -n;
+}
+

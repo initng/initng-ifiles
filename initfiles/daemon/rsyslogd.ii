@@ -1,0 +1,13 @@
+# NAME: 
+# DESCRIPTION: 
+# WWW: 
+
+daemon daemon/rsyslogd {
+	provide = virtual/syslog;
+	need = system/bootmisc;
+	env_file = /etc/sysconfig/rsyslog;
+	env PIDFILE=/var/lock/subsys/rsyslogd;
+	exec daemon = /sbin/rsyslogd $SYSLOGD_OPTIONS -n -i ${PIDFILE};
+	pid_file = ${PIDFILE};
+}
+

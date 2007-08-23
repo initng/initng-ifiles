@@ -145,6 +145,23 @@ service system/udev/filldev {
 #ifd fedora
 		#Don't know why, but this seems to be needed on Fedora...
 		@/bin/ln@ -snf /proc/self/fd /dev/fd
+
+		Parse through stuff in /etc/udev/makedev.d to add nodes
+		xargs_simple () {
+			ARGS=""
+			while read line; do
+        			ARGS="$ARGS $line"
+			done
+			if [ -n "$ARGS" ]; then
+				"$@" $ARGS
+			fi 
+		}
+		for i in /etc/udev/makedev.d/*.nodes; do
+			if [ -f "$i" ]; then
+				( @sed@ -e 's,#.*,,g' "$i" | \
+					xargs_simple @MAKEDEV@ -x ) &
+			fi
+		done 
 #endd
 
 #ifd gentoo enlisy

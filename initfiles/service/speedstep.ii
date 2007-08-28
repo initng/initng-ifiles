@@ -3,7 +3,7 @@
 # WWW: 
 
 service service/speedstep {
-	need = system/bootmisc system/modules/cpufreq_ondemand system/modules/cpufreq_userspace system/modules/cpufreq_stats system/modules/cpufreq_powersave system/modules/cpufreq_conservative system/modules/speedstep_centrino;
+	need = system/bootmisc system/modules/cpufreq_ondemand system/modules/cpufreq_userspace system/modules/cpufreq_stats system/modules/cpufreq_powersave system/modules/cpufreq_conservative system/modules/speedstep_centrino system/modules/acpi_cpufreq;
 	use = system/modules system/coldplug;
 	script start = {
 		@cat@ /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor >/tmp/origgovanor

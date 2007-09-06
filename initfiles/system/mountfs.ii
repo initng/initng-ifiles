@@ -56,7 +56,7 @@ service system/mountfs/home {
 
 service system/mountfs/network {
 	need = system/initial system/mountfs/essential virtual/net;
-	use = daemon/portmap;
+	use = virtual/portmap;
 	never_kill;
 	env NET_FS = afs,cifs,coda,davfs,gfs,ncpfs,nfs,nfs4,ocfs2,shfs,smbfs;
 

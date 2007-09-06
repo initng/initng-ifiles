@@ -146,7 +146,7 @@ service system/udev/filldev {
 		#Don't know why, but this seems to be needed on Fedora...
 		@/bin/ln@ -snf /proc/self/fd /dev/fd
 
-		Parse through stuff in /etc/udev/makedev.d to add nodes
+		#Parse through stuff in /etc/udev/makedev.d to add nodes
 		xargs_simple () {
 			ARGS=""
 			while read line; do

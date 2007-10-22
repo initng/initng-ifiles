@@ -2,7 +2,7 @@
  # WWW: 
  
 daemon daemon/rpcbind {
-	need = system/bootmisc virtual/net;
+	need = system/bootmisc virtual/net virtual/net/lo;
 	provide = virtual/portmap;
 	forks;
 	pid_of = rpcbind;

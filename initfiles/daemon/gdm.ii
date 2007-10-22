@@ -3,8 +3,8 @@
 # WWW: http://www.gnome.org/projects/gdm/
 
 daemon daemon/gdm {
-	need = system/bootmisc;
-	use = daemon/xfs service/faketty service/xorgconf;
+	need = system/bootmisc daemon/xfs;
+	use = service/faketty service/xorgconf;
 #ifd pingwinek
 	use = system/dbus;
 #elsed

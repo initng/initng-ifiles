@@ -13,7 +13,7 @@ service daemon/NetworkManager/prepare {
 }
 
 daemon daemon/NetworkManager {
-	need = system/bootmisc daemon/dbus daemon/NetworkManager/prepare system/modules/capability daemon/hald daemon/dhcdbd;
+	need = system/bootmisc daemon/dbus daemon/NetworkManager/prepare system/modules/capability daemon/hald;
 	provide = virtual/net;
 	env PID_FILE = /var/run/NetworkManager/NetworkManager.pid;
 	exec daemon  = @/usr/sbin/NetworkManager@ --pid-file=${PID_FILE};

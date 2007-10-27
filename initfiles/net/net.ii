@@ -113,7 +113,7 @@ service net/* {
 		# Put up the interface
                 @/sbin/ifup@ ${NAME}
 		# Check so its up
-                @ifconfig@ ${NAME} | @grep@ -qF "UP" || exit 1
+                @/sbin/ifconfig@ ${NAME} | @grep@ -qF "UP" || exit 1
                 exit 0
 	};
         script stop = {
@@ -121,7 +121,7 @@ service net/* {
 		# Shut down.
                 @/sbin/ifdown@ ${NAME}
 		# Check so its down.
-		# @ifconfig@ ${NAME} | @grep@ -qF "UP" && exit 1
+		# @/sbin/ifconfig@ ${NAME} | @grep@ -qF "UP" && exit 1
                 exit 0
 	};
 #endd

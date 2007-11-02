@@ -8,6 +8,8 @@ service system/clock {
 	env_file = /etc/default/rcS;
 #elsed fedora lfs mandriva
 	env_file = /etc/sysconfig/clock;
+#elsed sourcemage
+	env_file = /etc/sysconfig/hwclock;
 #elsed
 	env_file = /etc/conf.d/clock;
 #endd
@@ -19,7 +21,7 @@ service system/clock {
 #endd
 
 		setupopts() {
-#ifd debian linspire lfs
+#ifd debian linspire lfs sourcemage
 			if [ "${UTC}" = "yes" ]
 #elsed
 			if [ "${CLOCK}" = "UTC" -o "${UTC}" = "true" ]
@@ -78,7 +80,7 @@ service system/clock {
 #endd
 
 		setupopts() {
-#ifd debian linspire lfs
+#ifd debian linspire lfs sourcemage
 			if [ "${UTC}" = "yes" ]
 #elsed
 			if [ "${CLOCK}" = "UTC" -o "${UTC}" = "true" ]

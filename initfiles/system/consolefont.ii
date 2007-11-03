@@ -11,6 +11,8 @@ service system/consolefont {
 	env_file = /etc/sysconfig/console;
 #elsed debian ubuntu
 	env_file = /etc/console-tools/config;
+#elsed sourcemage
+	env_file = /etc/sysconfig/keymap;
 #elsed
 	env_file = /etc/rc.conf;
 	env_file = /etc/conf.d/consolefont;
@@ -29,10 +31,13 @@ service system/consolefont {
 			done
 		fi
 #endd
+#ifd sourcemage
+		CONSOLEFONT="${SETFONT_ARGS}"
+#elsed
 		[ -n "${SCREEN_FONT}" ] && CONSOLEFONT="${SCREEN_FONT}"
 		[ -n "${SYSFONT}" ] && CONSOLEFONT="${SYSFONT}"
 		[ -n "${FONT}" ] && CONSOLEFONT="${FONT}"
-
+#endd
 		if [ -z "${CONSOLEFONT}" ]
 		then
 			echo "Using the default console font"

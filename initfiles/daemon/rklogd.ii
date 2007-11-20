@@ -5,6 +5,7 @@
 daemon daemon/rklogd {
 	need = system/bootmisc daemon/rsyslogd;
 	env_file = /etc/sysconfig/rsyslog;
+	daemon_stops_badly;
 	exec daemon = /sbin/rklogd $KLOGD_OPTIONS -n;
 }
 

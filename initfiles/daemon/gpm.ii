@@ -4,6 +4,7 @@
 
 daemon daemon/gpm {
 	need = system/bootmisc;
+	use = system/udev;
 #ifd debian
 	# "Please read CODING_STANDARDS for ii-files!"
 	env device=/dev/input/mice;
@@ -25,8 +26,6 @@ daemon daemon/gpm {
 	env MOUSEDEV=/dev/input/mice;
 	env APPEND=;
 	env_file = /etc/conf.d/gpm;
-	exec daemon = @/usr/sbin/gpm@ -m ${MOUSEDEV} -t ${MOUSE} ${APPEND};
-	pid_file = /var/run/gpm.pid;
-	forks;
+	exec daemon = @/usr/sbin/gpm@ -D -m ${MOUSEDEV} -t ${MOUSE} ${APPEND};
 #endd
 }

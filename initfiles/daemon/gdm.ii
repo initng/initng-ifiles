@@ -4,7 +4,7 @@
 
 daemon daemon/gdm {
 	need = system/bootmisc daemon/xfs;
-	use = service/faketty service/xorgconf;
+	use = service/faketty service/xorgconf system/udev;
 #ifd pingwinek
 	use = system/dbus;
 #elsed

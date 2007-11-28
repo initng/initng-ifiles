@@ -4,6 +4,10 @@
 
 daemon daemon/consolekit {
 	need = system/bootmisc;
-	exec daemon = @/usr/sbin/console-kit-daemon@;
+#ifd fedora
+	exec_args daemon = --no-daemon;
+#elsed
 	pid_file = /var/run/console-kit-daemon.pid;
+#endd
+	exec daemon = @/usr/sbin/console-kit-daemon@;
 }

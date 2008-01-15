@@ -1,0 +1,55 @@
+# NAME: iceccd
+# DESCRIPTION: Icecream distributed compiler daemon
+# WWW: http://en.opensuse.org/Icecream
+
+daemon daemon/iceccd/scheduler {
+    need = system/bootmisc virtual/net;
+ 
+#ifd gentoo
+    env_file = /etc/conf.d/icecream;
+#elsed
+    env_file = /etc/defaults/icecream;
+#endd
+
+    suid = icecream;
+    sgid = icecream;
+    script daemon = {
+#ifd gentoo
+        local slogfile=${ICECREAM_SCHEDULER_LOG_FILE:-"/var/log/icecc_scheduler"}
+        touch ${slogfile} && chown icecream:icecream ${slogfile}
+        slogfile=${slogfile:+"-l ${slogfile}"}
+        @/usr/sbin/scheduler@ ${slogfile} ${netname} ${verbosity}
+#elsed
+        @/usr/sbin/scheduler@
+#endd
+    };
+}
+
+daemon daemon/iceccd {
+    need = system/bootmisc virtual/net;
+    use = daemon/iceccd/scheduler;
+
+#ifd gentoo
+    env_file = /etc/conf.d/icecream;
+#elsed
+    env_file = /etc/defaults/icecream;
+#endd
+
+    script daemon = {
+#ifd gentoo
+        local basedir=${ICECREAM_BASEDIR:-"/var/cache/icecream"}
+        local netname=${ICECREAM_NETNAME:+"-n ${ICECREAM_NETNAME}"}
+        local logfile=${ICECREAM_LOG_FILE:+"-l ${ICECREAM_LOG_FILE}"}
+        local nice=${ICECREAM_NICE_LEVEL:+"--nice ${ICECREAM_NICE_LEVEL}"}
+        local scheduler=${ICECREAM_SCHEDULER_HOST:+"-s ${ICECREAM_SCHEDULER_HOST}"}
+        local maxjobs=${ICECREAM_MAX_JOBS:+"-m ${ICECREAM_MAX_JOBS}"}
+        local verbosity=${ICECREAM_VERBOSITY:-"-v"}
+
+        [ "${ICECREAM_RUN_SCHEDULER}" == "yes" ] && ngc --quiet --instant -u daemon/iceccd/scheduler
+
+        @/usr/sbin/iceccd@ ${logfile} ${nice} ${scheduler} ${netname} -u icecream -b "${basedir}" ${maxjobs} ${verbosity}
+#elsed
+        @/usr/sbin/iceccd@ ${iceccd_opts}
+#endd
+    }; 
+}

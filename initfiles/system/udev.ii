@@ -175,7 +175,7 @@ service system/udev/filldev {
 
                 @mkdir@ -p /dev/.udev/db/ /dev/.udev/queue/
                 @/sbin/udevtrigger@
-                @/sbin/udevsettle@ --timeout=30
+                @/sbin/udevsettle@ --timeout=30 &
 #elsed
 		if [ ! -e /etc/udev/links.conf -a ! -d /lib/udev/devices ]
 		then

@@ -84,9 +84,16 @@ service system/udev/mountdev {
 		@mknod@ -m0666 /dev/zero c 1 5
 		@mknod@ /dev/console c 5 1
 
-		# Send SIGHUP to initng, will reopen /dev/initctl and /dev/initng.
-		# we can't assume that initng has pid 1, e.g. when booting from initrd
+		# Send SIGHUP to initng, will reopen /dev/initctl and
+		# /dev/initng.
+#ifd fedora
+		# we can't assume that initng has pid 1, e.g. when booting
+		# from initrd
+		# (NOTE: this happen only on a few distros, and is weird)
 		@/bin/killall@ -HUP initng
+#elsed
+		@/bin/kill@ -HUP 1
+#endd
 
 		exit 0
 	};

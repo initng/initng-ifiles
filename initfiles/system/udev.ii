@@ -164,19 +164,6 @@ service system/udev/filldev {
 		done 
 #endd
 
-#ifd gentoo enlisy
-		# No-one else creates these; we need to do it manually
-		@/bin/ln@ -snf /proc/self/fd /dev/fd
-		@/bin/ln@ -snf fd/0 /dev/stdin
-		@/bin/ln@ -snf fd/1 /dev/stdout
-		@/bin/ln@ -snf fd/2 /dev/stderr
-		@/bin/ln@ -snf /proc/kcore /dev/core
-		@/bin/ln@ -snf /proc/asound/oss/sndstat /dev/sndstat
-
-                @mkdir@ -p /dev/.udev/db/ /dev/.udev/queue/
-                @/sbin/udevtrigger@
-                @/sbin/udevsettle@ --timeout=30 &
-#elsed
 		if [ ! -e /etc/udev/links.conf -a ! -d /lib/udev/devices ]
 		then
 			# Some manually, just to be sure.
@@ -188,57 +175,18 @@ service system/udev/filldev {
 			@/bin/ln@ -snf /proc/asound/oss/sndstat /dev/sndstat &
 		fi
 
-		# which system provides udevsynthesize? gentoo does not.
-		# and which provides udevplug? gentoo does not, too.
 		# udevtrigger is available since udev 088
 		# udevsettle is available since udev 090
 
-		if [ -x "@/sbin/udevtrigger@" -a -x "@/sbin/udevsettle@" ]
-		then
-    			# if this directories are not present /dev will not be updated by udev
-    			@/bin/mkdir@ -p /dev/.udev/db/ /dev/.udev/queue/
+		# if this directories are not present /dev will not be updated by udev
+		@/bin/mkdir@ -p /dev/.udev/db/ /dev/.udev/queue/
 
-			# send hotplug events
-			@/sbin/udevtrigger@
+		# send hotplug events
+		@/sbin/udevtrigger@
 
-			# wait for the udevd childs to finish
-			@/sbin/udevsettle@ --timeout=300
-		elif [ -x "@/sbin/udevsynthesize@" ]
-		then
-			# run syntesizers that will make hotplug events for every
-			# devices that is currently in the computer, that will
-			# create all dev files.
+		# wait for the udevd childs to finish
+		@/sbin/udevsettle@
 
-			udevd_timeout=300
-			echo "Running @/sbin/udevsynthesize@ to populate /dev ..."
-			@/bin/mkdir@ -p /dev/.udev/db /dev/.udev/queue /dev/.udevdb
-
-			@/sbin/udevsynthesize@
-
-			# wait for the udevd childs to finish
-			echo "Waiting for /dev to be fully populated ..."
-			while [ -d /dev/.udev/queue/ -a ${udevd_timeout} -ne 0 ]
-			do
-				sleep .2
-				udevd_timeout=$((${udevd_timeout}-1))
-			done
-		elif [ -x "@/sbin/udevplug@" ]
-		then
-			@/sbin/udevplug@
-		elif [ -x "@/sbin/udevstart@" ]
-		then
-			udevd_timeout=60
-			@/sbin/udevstart@
-
-			# wait for the udevd childs to finish
-			echo "Waiting for /dev to be fully populated ..."
-			while [ -d /dev/.udev/queue/ -a ${udevd_timeout} -ne 0 ]
-			do
-				sleep .2
-				udevd_timeout=$((${udevd_timeout}-1))
-			done
-		fi
-#endd
 		chmod 0666 /dev/null
 
 #ifd debian

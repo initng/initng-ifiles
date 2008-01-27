@@ -6,6 +6,7 @@ daemon daemon/ifplugd/* {
 	need = system/bootmisc;
 	use = system/modules system/coldplug system/ifrename;
 	stdall = /dev/null;
+	respawn;
 #ifd debian
 	env_file = /etc/default/ifplugd;
 	script daemon = {

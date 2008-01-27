@@ -125,5 +125,6 @@ service system/clock {
 
 		echo "Syncing system clock to hardware clock [${TBLURB}] ..."
 		@/sbin/hwclock@ --systohc ${myopts}
+		exit 0
 	};
 }

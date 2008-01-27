@@ -9,6 +9,10 @@ daemon daemon/ifplugd/* {
 	respawn;
 #ifd debian
 	env_file = /etc/default/ifplugd;
+#elsed sourcemage
+	env_file = /etc/ifplugd/ifplugd.conf;
+#endd
+#ifd debian sourcemage
 	script daemon = {
 		IF1=`echo ${NAME} | @sed@ "s/-/_/"`
 		A=`eval echo \$\{ARGS_${IF1}\}`
@@ -27,12 +31,14 @@ service daemon/ifplugd {
 	#stdall = /dev/null;
 #ifd debian
 	env_file = /etc/default/ifplugd;
+#elsed sourcemage
+	env_file = /etc/ifplugd/ifplugd.conf;
 #elsed gentoo
 	env_file = /etc/conf.d/ifplugd;
 #endd
 
 	script start = {
-#ifd debian
+#ifd debian sourcemage
 		[ "${INTERFACES}" = "auto" -o "${INTERFACES}" = "all" ] && \
 #elsed gentoo
 		[ "${WIRELESS_INTERFACES}" = "no" -a "${INTERFACES}" = "" ] && \

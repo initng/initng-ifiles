@@ -6,27 +6,32 @@ daemon daemon/wpa_supplicant/* {
 	need = system/bootmisc;
 	use = system/ifrename system/modules;
 	pid_file = /var/run/wpa_supplicant-${NAME}.pid;
+#ifd gentoo
+	env CONFFILE = /etc/wpa_supplicant/wpa_supplicant.conf;
+#elsed
+	env CONFFILE = /etc/wpa_supplicant.conf;
+#endd
 	forks;
 	script daemon =  {
 		. ${INITNG_PLUGIN_DIR}/scripts/net/functions
 
-		eval opts=\"\$\{wpa_supplicant_${ifvar}\} -i${iface} -c/etc/wpa_supplicant.conf -B\"
+		eval opts=\"\$\{wpa_supplicant_${ifvar}\} -i${iface} -c${CONFFILE} -B\"
 		[ -f /sbin/wpa_cli.action ] && \
-				opts="${opts} -w -P/var/run/wpa_supplicant-${iface}.pid"
+			opts="${opts} -w -P/var/run/wpa_supplicant-${iface}.pid"
 
 		@/sbin/wpa_supplicant@ ${opts}
 
 		if [ -f /sbin/wpa_cli.action ]
 		then
-				@/sbin/ngc@ --quiet --instant -u daemon/wpa_cli/${iface}
-				exit 0
+			@/sbin/ngc@ --quiet --instant -u daemon/wpa_cli/${iface}
+			exit 0
 		fi
 
 		source "${libdir}/wpa_supplicant"
 		if ! wpa_supplicant_associate
 		then
-				@wpa_cli@ -i${iface} terminate
-				exit 1
+			@wpa_cli@ -i${iface} terminate
+			exit 1
 		fi
 
 		@/sbin/ngc@ --quiet --instant -u net/${iface}

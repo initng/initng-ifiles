@@ -29,8 +29,6 @@ daemon daemon/sshd {
 	need = system/bootmisc virtual/net;
 	conflict = daemon/dropbear;
 	use = daemon/sshd/generate_keys;
-	exec daemon = @/usr/sbin/sshd@;
-	pid_file = /var/run/sshd.pid;
-	forks;
+	exec daemon = @/usr/sbin/sshd@ -D;
 	daemon_stops_badly;
 }

@@ -7,52 +7,15 @@ daemon daemon/hald {
 	use = daemon/acpid;
 	stdall = /dev/null;
 #ifd debian
-	forks;
-	env PIDDIR=/var/run/hal;
-	env DAEMONUSER=hal;
 	env_file = /etc/default/hal;
-	pid_file = ${PIDDIR}/hald.pid;
-
-	script daemon = {
-		if [ ! -d ${PIDDIR} ]
-		then
-			@mkdir@ -p ${PIDDIR}
-			chown ${DAEMONUSER}:${DAEMONUSER} ${PIDDIR}
-		fi
-		@/usr/sbin/hald@ ${DAEMON_OPTS}
-	};
-#elsed gentoo
-	forks;
-	script daemon = {
-		if @/usr/sbin/hald@ --help | grep -qw -- "--use-syslog"
-		then
-			exec @/usr/sbin/hald@ --use-syslog
-		else
-			exec @/usr/sbin/hald@			
-		fi
-	};
-	pid_file = /var/run/hald.pid;
-	pid_file = /var/run/hald/hald.pid;
+	exec daemon = @/usr/sbin/hald@ ${DAEMON_OPTS} --daemon=no;
 #elsed
 	script daemon = {
-		# Make sure, there is no stale processes running.
-		killall hald
-		killall -9 hald
-
-		# Clear pid file.
-		@rm@ /var/run/hal/pid
-
-		# We have to probe what version it is, they use different arguments.
-		if @/usr/sbin/hald@ --help 2>&1 | @grep@ -- --retain-privileges
-		then
-			exec @/usr/sbin/hald@ --daemon=no --retain-privileges
-		elif @/usr/sbin/hald@ --help 2>&1 | @grep@ -- --drop-privileges
-		then
-			exec @/usr/sbin/hald@ --daemon=no --drop-privileges
-		else
-			exec @/usr/sbin/hald@ --daemon=no
-		fi
-		exit 1
+#ifd gentoo
+		@/usr/sbin/hald@ --help | grep -qw -- "--use-syslog" &&
+		OPTS="--use-syslog"
+#endd
+		exec @/usr/sbin/hald@ $OPTS --daemon=no
 	};
 #endd
 }

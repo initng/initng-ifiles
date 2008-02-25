@@ -7,7 +7,5 @@ daemon daemon/dhclient/* {
 	use = system/modules system/coldplug;
 	stdout = /var/log/dhclient.${NAME};
 	exec daemon = @/sbin/dhclient@ -d ${NAME};
-	#pid_file = /var/run/dhclient-${NAME}.pid;
-	forks;
 	respawn;
 }

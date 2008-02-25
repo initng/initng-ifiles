@@ -4,7 +4,5 @@
 
 daemon daemon/dhcdbd {
 	need = system/bootmisc daemon/dbus;
-	exec daemon = @/sbin/dhcdbd@ --system;
-	pid_file = /var/run/dhcdbd.pid;
-	forks;
+	exec daemon = @/sbin/dhcdbd@ --system --no-daemon;
 }

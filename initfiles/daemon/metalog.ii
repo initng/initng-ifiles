@@ -9,8 +9,7 @@ daemon daemon/metalog {
 #elsed
 	need = system/bootmisc;
 #endd
-	exec daemon = @/usr/sbin/metalog@ -B -p /var/run/metalog.pid;
-	pid_file = /var/run/metalog.pid;
-	forks;
+	exec daemon = @/usr/sbin/metalog@;
+	respawn;
 	daemon_stops_badly;
 }

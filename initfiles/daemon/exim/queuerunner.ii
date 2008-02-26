@@ -7,7 +7,6 @@ daemon daemon/exim/queuerunner {
 	env QFLAGS="";
 	env SMTPLISTENEROPTIONS="";
 	env QUEUEINTERVAL=30m;
-	env QRPIDFILE=/var/run/exim4/eximqr.pid;
 
 #ifd debian 
 	env_file = /etc/defaults/exim4; 
@@ -15,7 +14,5 @@ daemon daemon/exim/queuerunner {
 	env_file = /etc/conf.d/exim; 
 #endd
 
-	exec daemon = @/usr/sbin/exim4@ -oP "${QRPIDFILE}" -q${QFLAGS}${QUEUEINTERVAL} ${COMMONOPTIONS} ${QUEUERUNNEROPTIONS};
-	pid_file = ${QRPIDFILE};
-	forks;
+	exec daemon = @/usr/sbin/exim4@ -q${QFLAGS}${QUEUEINTERVAL} ${COMMONOPTIONS} ${QUEUERUNNEROPTIONS};
 }

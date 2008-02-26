@@ -4,49 +4,13 @@
 
 daemon daemon/dbus {
 	need = system/bootmisc;
-	forks;
-#ifd fedora altlinux mandriva
-	pid_file = /var/run/messagebus.pid;
-#elsed debian
-	env DAEMONUSER=messagebus;
-	env PIDDIR = /var/run/dbus;
-	env PIDFILE = ${PIDDIR}/pid;
-	env_file = /etc/default/dbus;
-	pid_file = ${PIDFILE};
-#endd
-#ifd pingwinek sourcemage
-	pid_file = /var/run/dbus/pid;
-#elsed
-	pid_file = /var/run/dbus.pid;
-#endd
 #ifd debian
+	env_file = /etc/default/dbus;
 	script daemon = {
 		[ "${ENABLED}" = 0 ] && exit 0
-
-		#Debian and Ubuntu are using different files
-		DAEMON=/usr/bin/dbus-daemon
-
-		if [ ! -d ${PIDDIR} ]
-		then
-			@mkdir@ -p ${PIDDIR}
-			chown ${DAEMONUSER} ${PIDDIR}
-			chgrp ${DAEMONUSER} ${PIDDIR}
-		fi
-		if [ -e ${PIDFILE} ]
-		then
-			PIDDIR=/proc/`@cat@ ${PIDFILE}`
-			if [ -d ${PIDDIR} -a  "`readlink -f ${PIDDIR}/exe`" = "${DAEMON}" ]
-			then
-				echo "${DESC} already started; not starting."
-			else
-				echo "Removing stale PID file ${PIDFILE}."
-				@rm@ -f ${PIDFILE}
-			fi
-		fi
-
-		exec ${DAEMON} --system ${PARAMS}
+		exec @/usr/bin/dbus-daemon@ --system ${PARAMS} --nofork
 	};
 #elsed
-	exec daemon = @/bin/dbus-daemon:/usr/bin/dbus-daemon:/usr/bin/dbus-daemon-1@ --system --fork;
+	exec daemon = @/bin/dbus-daemon:/usr/bin/dbus-daemon:/usr/bin/dbus-daemon-1@ --system --nofork;
 #endd
 }

@@ -7,11 +7,9 @@ daemon daemon/distccd {
 	suid = distcc;
 
 #ifd gentoo
-	env DISTCCD_PIDFILE=/var/run/distccd/distccd.pid;
 	env DISTCCD_NICE=10;
 	env DISTCCD_OPTS=--port 3632 --log-level critical --allow 192.168.1.0/24;
 #elsed
-	env PIDFILE=/var/run/distccd/distccd.pid;
 	env PORT=3632;
 	env ALLOW=192.168.0.0/24;
 	env LISTEN=0.0.0.0;
@@ -21,12 +19,8 @@ daemon daemon/distccd {
 	env_file = /etc/conf.d/distccd;
 
 #ifd gentoo
-	exec daemon = /usr/bin/distccd -N ${DISTCCD_NICE} --pid-file ${DISTCCD_PIDFILE} ${DISTCCD_OPTS};
-	pid_file = ${DISTCCD_PIDFILE};
+	exec daemon = @/usr/bin/distccd@ --daemon --no-detach -N ${DISTCCD_NICE} ${DISTCCD_OPTS};
 #elsed
-	exec daemon = @/usr/bin/distccd@ -N ${NICE} --pid-file ${PIDFILE} --port ${PORT} --allow ${ALLOW} --listen ${LISTEN};
-	pid_file = ${PIDFILE};
+	exec daemon = @/usr/bin/distccd@ --daemon --no-detach -N ${NICE} --port ${PORT} --allow ${ALLOW} --listen ${LISTEN};
 #endd
-
-	forks;
 }

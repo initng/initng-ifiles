@@ -3,11 +3,12 @@
 # WWW: http://ddclient.sourceforge.net/
 
 daemon daemon/ddclient {
+	env PIDFILE = /var/run/ddclient/ddclient.pid;
         suid = ddclient;
         sgid = ddclient;
         need = virtual/net system/bootmisc;
-        exec daemon = @/usr/sbin/ddclient@;
-        pid_file = /var/run/ddclient/ddclient.pid;
+        exec daemon = @/usr/sbin/ddclient@ -pid ${PIDFILE};
+        pid_file = ${PIDFILE};
         forks;
         respawn;
 }

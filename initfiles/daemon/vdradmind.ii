@@ -5,9 +5,6 @@
 daemon daemon/vdradmind {
 	need = system/bootmisc;
 	use = daemon/vdr daemon/svdrpd;
-	pid_file = /var/run/vdradmind.pid;
 	stdout = /dev/null;
-	exec daemon = @vdradmind.pl@;
-	exec kill = @vdradmind.pl@ --kill;
-	forks;
+	exec daemon = @vdradmind.pl@ --nofork;
 }

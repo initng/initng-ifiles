@@ -4,6 +4,7 @@
 
 service system/swap {
 	need = system/initial system/mountfs/essential;
+	start_fail_ok;
 	exec start = @/sbin/swapon@ -a;
 	exec stop = @/sbin/swapoff@ -a;
 }

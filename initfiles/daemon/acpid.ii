@@ -19,7 +19,7 @@ service daemon/acpid/modules {
 		if [ -d ${LOC} ]
 		then
 			# we doesn't support linux 2.4, so we need to look for .ko
-			MODAVAIL=`@find@ ${LOC} -type f -name "*.ko" -printf "%f\n" | @sed@ 's/\.ko$//'`
+			MODAVAIL=`@find@ ${LOC} -type f -name "*.ko" -or -name "*.ko.gz" -printf "%f\n" | @sed@ 's/\.ko.*$//'`
 		else
 			MODAVAIL=""
 		fi

@@ -101,9 +101,10 @@ search_path=
 # Identify the distribution
 #
 distro=generic
-[ -e /etc/gentoo-release ] && distro=gentoo
-[ -e /etc/debian_version ] && distro=debian
-[ -e /etc/fedora-release ] && distro=fedora
+[ -e /etc/gentoo-release ]    && distro=gentoo
+[ -e /etc/debian_version ]    && distro=debian
+[ -e /etc/fedora-release ]    && distro=fedora
+[ -e /etc/pclinuxos-release ] && distro=pclinuxos
 
 #
 # Get the default sysvinit runlevel

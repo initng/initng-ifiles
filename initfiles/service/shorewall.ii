@@ -3,7 +3,7 @@
 # WWW: http://www.shorewall.net/
 
 service service/shorewall {
-	need = system/bootmisc virtual/net;
+	need = system/bootmisc;
 	use = daemon/ulogd;
 	provide = virtual/firewall;
 	exec start = @/sbin/shorewall@ -q start;

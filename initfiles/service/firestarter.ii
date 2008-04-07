@@ -3,7 +3,7 @@
 # WWW: 
 
 service service/firestarter {
-	need = system/initial system/mountroot virtual/net/lo;
+	need = system/initial system/mountroot;
 	provide = virtual/firewall;
 	exec start = @/etc/firestarter/firestarter.sh@ start;
 	exec stop = @/etc/firestarter/firestarter.sh@ stop;

@@ -3,7 +3,7 @@
 # WWW: http://www.iptables.org/
 
 service service/iptables {
-	need = system/initial system/mountfs/essential system/hostname virtual/net/lo;
+	need = system/initial system/mountfs/essential system/hostname;
 	provide = virtual/firewall;
 #ifd fedora mandriva
 	env STATEFILE = /etc/sysconfig/iptables;

@@ -5,5 +5,5 @@
 daemon daemon/vixie-cron {
 	need = system/bootmisc;
 	provide = virtual/cron;
-	exec daemon = @/usr/sbin/cron@ -f;
+	exec daemon = @/usr/sbin/cron@ -n;
 }

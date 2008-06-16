@@ -1,6 +1,6 @@
-# NAME: 
-# DESCRIPTION: 
-# WWW: 
+# NAME: slapd
+# DESCRIPTION: OpenLDAP stand-alone LDAP daemon 
+# WWW: http://www.openldap.org/
 
 daemon daemon/slapd {
 	need = system/bootmisc;

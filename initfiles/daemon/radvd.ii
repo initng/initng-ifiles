@@ -1,0 +1,12 @@
+# NAME: radvd
+# DESCRIPTION: Router Advertisement Daemon for IPv6
+# WWW: 
+
+daemon daemon/radvd {
+	env PIDFILE = /var/run/radvd.pid;
+	need = system/bootmisc;
+	use = system/sysctl;
+	pid_file = ${PIDFILE};
+	forks;
+	exec daemon = /usr/sbin/radvd -p ${PIDFILE};
+}

@@ -8,10 +8,7 @@ service system/keymaps {
 
 	env ttydev = /dev/tty;
 #ifd debian linspire
-	env CONFDIR=/etc/console;
-	env CONFFILEROOT=boottime;
-	env EXT=kmap;
-	env CONFFILE=${CONFDIR}/${CONFFILEROOT}.${EXT}.gz;
+	env CONFFILE=/etc/console/boottime.kmap.gz;
 #elsed lfs
 	env_file = /etc/sysconfig/console;
 #elsed fedora pingwinek mandriva
@@ -82,12 +79,6 @@ service system/keymaps {
 			fi
 		fi
 #elsed
-		if [ -e /etc/console/boottime.kmap.gz ]
-		then
-			@/bin/loadkeys@ -q /etc/console/boottime.kmap.gz >/dev/null 2>&1
-			exit 0
-		fi
-
 		WINDOWKEYS_KEYMAP=
 
 		# Force linux keycodes for PPC.
@@ -122,7 +113,11 @@ service system/keymaps {
 			termencoding='\033(K'
 		fi
 
+#ifd sourcemage
+		[ -n "$TTY_NUMS" ] && for n in $TTY_NUMS
+#elsed
 		for n in `@seq@ 1 11`
+#endd
 		do
 			printf "${termencoding}" >${ttydev}${n}
 		done

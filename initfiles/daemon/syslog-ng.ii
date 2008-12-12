@@ -6,8 +6,9 @@ daemon daemon/syslog-ng {
 	provide = virtual/syslog;
 #ifd debian
 	need = system/bootmisc daemon/syslogd/prepare;
+	exec daemon = @/usr/sbin/syslog-ng@ --foreground;
 #elsed
 	need = system/bootmisc;
-#endd
 	exec daemon = @/sbin/syslog-ng@ --foreground;
+#endd
 }

@@ -1,8 +1,8 @@
-# NAME: 
-# DESCRIPTION: 
+# NAME: dhcdbd
+# DESCRIPTION: D-Bus interface to dhclient.
 # WWW: 
 
 daemon daemon/dhcdbd {
 	need = system/bootmisc daemon/dbus;
-	exec daemon = @/sbin/dhcdbd@ --system --no-daemon;
+	exec daemon = @/usr/sbin/dhcdbd@ --system --no-daemon;
 }

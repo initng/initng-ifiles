@@ -5,9 +5,5 @@
 daemon daemon/lighttpd {
 	need = system/bootmisc virtual/net;
 	use = system/modules system/coldplug;
-#ifd gentoo
-	exec daemon = @/usr/sbin/lighttpd@ -D -f /etc/lighttpd.conf;
-#elsed
 	exec daemon = @/usr/sbin/lighttpd@ -D -f /etc/lighttpd/lighttpd.conf;
-#endd
 }

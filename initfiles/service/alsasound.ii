@@ -100,6 +100,8 @@ service service/alsasound {
 	also_stop = service/alsasound/cards service/alsasound/ioctl32 service/alsasound/seq service/alsasound/oss;
 	env alsascrdir=/etc/alsa.d;
 	script start = {
+		[ -e /proc/modules ] || exit 0
+
 		for DRIVER in `@/sbin/lsmod@ | @awk@ '$1~/^snd.*/{print $1}'`
 		do
 			TMP=${DRIVER##snd-}

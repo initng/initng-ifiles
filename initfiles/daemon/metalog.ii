@@ -4,6 +4,7 @@
 
 daemon daemon/metalog {
 	provide = virtual/syslog;
+	stdall = /dev/null;
 #ifd debian
 	need = system/bootmisc daemon/syslogd/prepare;
 #elsed

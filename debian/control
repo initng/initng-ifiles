@@ -1,7 +1,7 @@
 Source: initng-ifiles
 Section: admin
 Priority: optional
-Maintainer: Armin Berres <a.berres@onlinehome.de>
+Maintainer: Ismael Luceno <ismael@initng.org>
 Build-Depends: debhelper (>= 4.0.0), cmake (>= 2.2), initng-dev
 Standards-Version: 3.6.2
 

@@ -21,6 +21,7 @@ service system/mountroot/lvm {
 			[ -d ${dm_dir} ] || @mkdir@ --mode=755 ${dm_dir}
 			[ -c ${dm_file} -o -z "${major}" -o -z "${minor}" ] || @mknod@ --mode=600 ${dm_file} c ${major} ${minor}
 		fi
+		@/sbin/udevadm@ settle
 		@/sbin/vgscan@ --config "$config" --mknodes
 		@/sbin/vgchange@ --config "$config" -a y
 	};

@@ -167,8 +167,8 @@ service system/udev/filldev {
 		}
 		for i in /etc/udev/makedev.d/*.nodes; do
 			if [ -f "$i" ]; then
-				( @sed@ -e 's,#.*,,g' "$i" | \
-					xargs_simple @MAKEDEV@ -x ) &
+				{ @sed@ -e 's,#.*,,g' "$i" | \
+					xargs_simple @MAKEDEV@ -x } &
 			fi
 		done 
 #endd
@@ -182,24 +182,17 @@ service system/udev/filldev {
 			@/bin/ln@ -snf fd/2 /dev/stderr &
 			@/bin/ln@ -snf /proc/kcore /dev/core &
 			@/bin/ln@ -snf /proc/asound/oss/sndstat /dev/sndstat &
-			wait
 		fi
 
-		# udevtrigger is available since udev 088
-		# udevsettle is available since udev 090
+		# udev >= 122 is required
 
 		# if this directories are not present /dev will not be updated
 		# by udev
 		@/bin/mkdir@ -p /dev/.udev/db/ /dev/.udev/queue/
 
 		# send hotplug events and wait for the udevd childs to finish
-		if [ `@/sbin/udevd@ --version` -ge 122 ]; then
-			@/sbin/udevadm@ trigger
-			@/sbin/udevadm@ settle
-		else
-			@/sbin/udevtrigger@
-			@/sbin/udevsettle@
-		fi
+		@/sbin/udevadm@ trigger
+		@/sbin/udevadm@ settle
 
 		chmod 0666 /dev/null
 
@@ -211,6 +204,7 @@ service system/udev/filldev {
 			ln -sf /sbin/true /dev/MAKEDEV
 		fi
 #endd
+		wait
 	};
 #ifd gentoo enlisy
 	script stop = {

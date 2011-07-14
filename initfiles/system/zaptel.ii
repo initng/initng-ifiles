@@ -1,0 +1,19 @@
+# NAME: system/zaptel
+# DESCRIPTION: Load the Zaptel driver for Digium VoIP cards
+# WWW:
+
+service system/zaptel {
+	need = system/initial system/mountroot system/modules;
+	env_file = /etc/default/zaptel;
+	script start = {
+		[ -x @/sbin/ztcfg@ -a -r /etc/zaptel.conf ] || exit 0
+		if @/bin/head@ -c 0 /dev/zap/pseudo 2>/dev/null; then
+		  @/sbin/modprobe@ ztdummy || true
+	        fi
+	        if [ -r /etc/fxotune.conf -a -x fxotune ]; then
+	          @/sbin/fxotune@ -s
+	        fi
+
+	        exec @/sbin/ztcfg@ $DAEMON_OPTS
+	};
+}
